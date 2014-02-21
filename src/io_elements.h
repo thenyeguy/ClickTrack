@@ -4,14 +4,16 @@
 #include <exception>
 #include <fstream>
 #include <string>
-#include "portaudio_wrapper.h"
 #include "audio_generics.h"
 
+
+/* TODO: drop a new wrapper class into microphone and speaker
+ */
 
 namespace ClickTrack
 {
     /* The microphone is an input device. It uses the default input device on
-     * your computer, and pulls its data from portaudio.
+     * your computer, and pulls its data from the OS wrapper.
      */
     class Microphone : public AudioGenerator
     {
@@ -20,14 +22,11 @@ namespace ClickTrack
 
         private:
             void generate_outputs(std::vector< std::vector<SAMPLE> >& outputs);
-
-
-            InputStream stream;
     };
 
 
     /* The speaker is an output device. It uses the default output device on
-     * your computer, and pushes its data out to portaudio.
+     * your computer, and pushes its data out to the OS wrapper.
      */
     class Speaker : public AudioConsumer
     {
@@ -36,9 +35,6 @@ namespace ClickTrack
 
         private:
             void process_inputs(std::vector< std::vector<SAMPLE> >& inputs);
-
-
-            OutputStream stream;
     };
 
 

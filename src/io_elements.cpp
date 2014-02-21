@@ -5,27 +5,25 @@ using namespace ClickTrack;
 
 
 Microphone::Microphone(unsigned num_channels, bool defaultDevice)
-    : AudioGenerator(num_channels),
-      stream(num_channels,defaultDevice)
+    : AudioGenerator(num_channels)
 {}
 
 
 void Microphone::generate_outputs(std::vector< std::vector<SAMPLE> >& outputs)
 {
-    stream.readFromStream(outputs);
+    // TODO: fix this with a wrapper
 }
 
 
 
 Speaker::Speaker(unsigned num_inputs, bool defaultDevice)
-    : AudioConsumer(num_inputs),
-      stream(num_inputs,defaultDevice)
+    : AudioConsumer(num_inputs)
 {}
 
 
 void Speaker::process_inputs(std::vector< std::vector<SAMPLE> >& inputs)
 {
-    stream.writeToStream(inputs);
+    // TODO: fix this with a wrapper
 }
 
 

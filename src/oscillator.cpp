@@ -1,10 +1,10 @@
 #include <iostream>
 #include <cmath>
 #include <random>
-#include "portaudio_wrapper.h"
 #include "oscillator.h"
 
 using namespace ClickTrack;
+
 
 Oscillator::Oscillator(float in_freq)
     : AudioGenerator(1), phase(0.0), phase_inc(in_freq * 2*M_PI/SAMPLE_RATE), 

@@ -3,18 +3,24 @@
 
 #include <vector>
 #include <mutex>
-#include "portaudio_wrapper.h"
 #include "ringbuffer.h"
+
+
+/* Define the sample type.
+ * TODO: move this into an android specic header file
+ */
+typedef float SAMPLE;
+const unsigned SAMPLE_RATE = 44100;
 
 
 namespace ClickTrack
 {
     /* This determines the size of our ring buffers and processing blocks.
      * For best performance, block size should be an integer multiple of the
-     * portaudio buffer size. For processing safety the buffer size should be
+     * system buffer size. For processing safety the buffer size should be
      * an integer multiple of  block size, greater than 1.
      */
-    const unsigned FRAME_SIZE = PORTAUDIO_BUFFER_SIZE;
+    const unsigned FRAME_SIZE = 0; //TODO: set this value based on android stuff
     const unsigned DEFAULT_RINGBUFFER_SIZE = 4*FRAME_SIZE;
 
 
