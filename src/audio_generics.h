@@ -20,7 +20,7 @@ namespace ClickTrack
      * system buffer size. For processing safety the buffer size should be
      * an integer multiple of  block size, greater than 1.
      */
-    const unsigned FRAME_SIZE = 0; //TODO: set this value based on android stuff
+    const unsigned FRAME_SIZE = 128; //TODO: set this value based on android stuff
     const unsigned DEFAULT_RINGBUFFER_SIZE = 4*FRAME_SIZE;
 
 

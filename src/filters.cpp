@@ -47,7 +47,6 @@ void PassFilter::filter(std::vector< std::vector<SAMPLE> >& input,
                 case high:
                     y = (x-y1)/2;
                     break;
-
             }
 
             // Store the results to our buffers

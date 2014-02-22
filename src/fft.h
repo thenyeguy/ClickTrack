@@ -3,7 +3,6 @@
 
 #include <complex>
 #include <vector>
-#include <fftw3.h>
 
 
 /* TODO: remove this typedef

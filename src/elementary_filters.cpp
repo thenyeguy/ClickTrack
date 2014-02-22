@@ -1,4 +1,6 @@
 #include <iostream>
+#include <cstdlib>
+#include <cmath>
 #include "elementary_filters.h"
 
 using namespace ClickTrack;
