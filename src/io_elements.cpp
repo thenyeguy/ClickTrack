@@ -4,26 +4,26 @@
 using namespace ClickTrack;
 
 
-Microphone::Microphone(unsigned num_channels, bool defaultDevice)
-    : AudioGenerator(num_channels)
+Microphone::Microphone(unsigned num_channels)
+    : AudioGenerator(num_channels), openSles(OpenSlesWrapper::getInstance())
 {}
 
 
 void Microphone::generate_outputs(std::vector< std::vector<SAMPLE> >& outputs)
 {
-    // TODO: fix this with a wrapper
+    openSles.readInputs(outputs);
 }
 
 
 
-Speaker::Speaker(unsigned num_inputs, bool defaultDevice)
-    : AudioConsumer(num_inputs)
+Speaker::Speaker(unsigned num_inputs)
+    : AudioConsumer(num_inputs), openSles(OpenSlesWrapper::getInstance())
 {}
 
 
 void Speaker::process_inputs(std::vector< std::vector<SAMPLE> >& inputs)
 {
-    // TODO: fix this with a wrapper
+    openSles.writeOutputs(inputs);
 }
 
 

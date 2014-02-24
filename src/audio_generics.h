@@ -4,13 +4,7 @@
 #include <vector>
 #include <mutex>
 #include "ringbuffer.h"
-
-
-/* Define the sample type.
- * TODO: move this into an android specic header file
- */
-typedef float SAMPLE;
-const unsigned SAMPLE_RATE = 44100;
+#include "opensles_wrapper.h"
 
 
 namespace ClickTrack
@@ -20,7 +14,7 @@ namespace ClickTrack
      * system buffer size. For processing safety the buffer size should be
      * an integer multiple of  block size, greater than 1.
      */
-    const unsigned FRAME_SIZE = 128; //TODO: set this value based on android stuff
+    const unsigned FRAME_SIZE = BUFFER_SIZE;
     const unsigned DEFAULT_RINGBUFFER_SIZE = 4*FRAME_SIZE;
 
 

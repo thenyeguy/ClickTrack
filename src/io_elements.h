@@ -18,10 +18,12 @@ namespace ClickTrack
     class Microphone : public AudioGenerator
     {
         public:
-            Microphone(unsigned num_channels = 1, bool defaultDevice=true);
+            Microphone(unsigned num_channels = 1);
 
         private:
             void generate_outputs(std::vector< std::vector<SAMPLE> >& outputs);
+
+            OpenSlesWrapper& openSles;
     };
 
 
@@ -31,10 +33,12 @@ namespace ClickTrack
     class Speaker : public AudioConsumer
     {
         public:
-            Speaker(unsigned num_inputs = 1, bool defaultDevice=true);
+            Speaker(unsigned num_inputs = 1);
 
         private:
             void process_inputs(std::vector< std::vector<SAMPLE> >& inputs);
+
+            OpenSlesWrapper& openSles;
     };
 
 
