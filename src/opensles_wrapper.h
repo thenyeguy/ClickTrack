@@ -29,17 +29,17 @@ namespace ClickTrack
             /* This will return a reference to the singleton object, and
              * instantiate it if necessary
              */
-            static OpenSlesWrapper& getInstance();
+            static OpenSlesWrapper& get_instance();
 
             /* Write outputs will send audio out to the system
              * speakers/headphones. Currently it supports only mono or stereo.
              */
-            void writeOutputs(std::vector< std::vector<SAMPLE> >& outputs);
+            void write_outputs(std::vector< std::vector<SAMPLE> >& outputs);
 
             /* Read inputs will grab the audio out from the system microphone.
              * Currently it only supports mono
              */
-            void readInputs(std::vector< std::vector<SAMPLE> >& inputs);
+            void read_inputs(std::vector< std::vector<SAMPLE> >& inputs);
 
         private:
             /* Constructor/destructor are made private as this is a singleton
@@ -54,11 +54,11 @@ namespace ClickTrack
              *
              * A mutex is used to lock the buffer until ready to receive
              */
-            static void outputCallback(SLAndroidSimpleBufferQueueItf bq, 
+            static void output_callback(SLAndroidSimpleBufferQueueItf bq, 
                     void *context);
 
             const unsigned num_output_channels;
-            OPENSLES_SAMPLE* outputBuffer;
+            OPENSLES_SAMPLE* output_buffer;
             std::mutex outputLock;
             
             /* This callback is registered to the input buffer, and gets called
@@ -67,39 +67,39 @@ namespace ClickTrack
              *
              * A mutex is used to lock the bufer until ready to read
              */
-            static void inputCallback(SLAndroidSimpleBufferQueueItf bq, 
+            static void input_callback(SLAndroidSimpleBufferQueueItf bq, 
                     void *context);
             
             const unsigned num_input_channels;
-            OPENSLES_SAMPLE* inputBuffer;
-            std::mutex inputLock;
+            OPENSLES_SAMPLE* input_buffer;
+            std::mutex input_lock;
 
             /* Used internally, it is called when an OpenSL call fails to log
              * relevant information and die.
              *
              * If given a sucess, it NOPs
              */ 
-            void handleOpenSlesError(SLresult result);
+            void handle_open_sles_error(SLresult result);
 
             /* The OpenSL ES engine is used to create all other classes
              */
-            SLObjectItf engineObject;
+            SLObjectItf engine_object;
             SLEngineItf engine;
 
             /* The output mix is responsible for controlling the actual audio
              * output. The player and its buffer are responsinble for putting
              * output to the OS
              */
-            SLObjectItf outputMixObject;
-            SLObjectItf playerObject;
+            SLObjectItf output_mix_object;
+            SLObjectItf player_object;
             SLPlayItf player;
-            SLAndroidSimpleBufferQueueItf outputBufferQueue;
+            SLAndroidSimpleBufferQueueItf output_buffer_queue;
 
             /* The input system is responsible for reading in audio
              */
-            SLObjectItf recorderObject;
+            SLObjectItf recorder_object;
             SLRecordItf recorder;
-            SLAndroidSimpleBufferQueueItf inputBufferQueue;
+            SLAndroidSimpleBufferQueueItf input_buffer_queue;
     };
 }
 
