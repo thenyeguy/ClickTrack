@@ -8,7 +8,7 @@ LOCAL_CPPFLAGS := -std=c++11 -pthread -frtti -fexceptions -g \
 
 # Define our source files 
 LOCAL_LDLIBS += -lOpenSLES -llog
-LOCAL_SRC_FILES := $(wildcard $(LOCAL_PATH)/src/*.cpp)
+LOCAL_SRC_FILES := $(wildcard $(LOCAL_PATH)/src/*.cpp) $(wildcard $(LOCAL_PATH)/bind/*.cpp)
 
 # Define our target lib
 LOCAL_MODULE := clicktrack

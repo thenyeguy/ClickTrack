@@ -14,7 +14,7 @@ namespace ClickTrack
     /* Define the sample type and buffer sizes
      */
     typedef float SAMPLE;
-    typedef short OPENSLES_SAMPLE;
+    typedef signed short OPENSLES_SAMPLE;
     const unsigned SAMPLE_RATE = 44100;
     const unsigned BUFFER_SIZE = 128;
 
@@ -56,33 +56,26 @@ namespace ClickTrack
              */
             static void output_callback(SLAndroidSimpleBufferQueueItf bq, 
                     void *context);
+            std::mutex output_lock;
 
-            const unsigned num_output_channels;
-            OPENSLES_SAMPLE* output_buffer;
-            std::mutex outputLock;
-            
-            /* This callback is registered to the input buffer, and gets called
-             * when the buffer is filled. The context will be a pointer back to
-             * this object
-             *
-             * A mutex is used to lock the bufer until ready to read
-             */
             static void input_callback(SLAndroidSimpleBufferQueueItf bq, 
                     void *context);
-            
-            const unsigned num_input_channels;
-            OPENSLES_SAMPLE* input_buffer;
             std::mutex input_lock;
 
+            OPENSLES_SAMPLE* output_buffer;
+            OPENSLES_SAMPLE* input_buffer;
+
             /* Used internally, it is called when an OpenSL call fails to log
-             * relevant information and die.
+             * relevant information and die. Passed a string that provides
+             * information as what the caller was
              *
              * If given a sucess, it NOPs
              */ 
-            void handle_open_sles_error(SLresult result);
+            void check_error(const char* info, SLresult result);
 
             /* The OpenSL ES engine is used to create all other classes
              */
+            const unsigned num_channels;
             SLObjectItf engine_object;
             SLEngineItf engine;
 

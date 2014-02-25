@@ -1,8 +1,7 @@
+#include "logcat.h"
 #include "opensles_wrapper.h"
 
 using namespace ClickTrack;
-
-// TODO: add logging statements to failures
 
 
 OpenSlesWrapper& OpenSlesWrapper::get_instance()
@@ -14,13 +13,10 @@ OpenSlesWrapper& OpenSlesWrapper::get_instance()
 
 void OpenSlesWrapper::write_outputs(std::vector< std::vector<SAMPLE> >& outputs)
 {
-    // Lock the buffer so that we can't write until the previous buffer is clear
-    outputLock.lock();
-
     // Write out the next buffer
     for(unsigned i = 0; i < BUFFER_SIZE; i++)
     {
-        for(unsigned j = 0; j < num_output_channels; j++)
+        for(unsigned j = 0; j < num_channels; j++)
         {
             // Automatically handle mono input
             SAMPLE sample;
@@ -31,28 +27,29 @@ void OpenSlesWrapper::write_outputs(std::vector< std::vector<SAMPLE> >& outputs)
 
             // Clip instead of overflowing
             if(sample > 0.999f)  sample = 0.999f;
-            if(sample <= -0.999f) sample = -0.999f;
+            if(sample < -0.999f) sample = -0.999f;
 
-            // Convert to signed short and save in buffer
-            signed short quantized = sample * 32768;
-            output_buffer[num_output_channels*i + j] = quantized;
+            // Convert and save in buffer
+            output_buffer[num_channels*i + j] = sample * 32768;
         }
     }
 
     // Send the buffer to output
-    handle_open_sles_error((*output_buffer_queue)->
-            Enqueue(output_buffer_queue, output_buffer, num_output_channels*BUFFER_SIZE));
+    output_lock.lock();
+    check_error("output_buffer_queue->Enqueue", (*output_buffer_queue)->
+            Enqueue(output_buffer_queue, output_buffer, 
+                num_channels*BUFFER_SIZE*sizeof(OPENSLES_SAMPLE)));
 }
 
 
 void OpenSlesWrapper::read_inputs(std::vector< std::vector<SAMPLE> >& inputs)
 {
-    // Lock the buffer so that we can't read until the next buffer is in
-    input_lock.lock();
-
     // Grab the buffer from input
-    handle_open_sles_error((*input_buffer_queue)->
-            Enqueue(input_buffer_queue, input_buffer, num_input_channels*BUFFER_SIZE));
+    input_lock.lock();
+    check_error("input_buffer_queue->Enqueue", (*input_buffer_queue)->
+            Enqueue(input_buffer_queue, input_buffer, 
+                num_channels*BUFFER_SIZE*sizeof(OPENSLES_SAMPLE)));
+
 
     // Write out the next buffer
     for(unsigned i = 0; i < BUFFER_SIZE; i++)
@@ -60,80 +57,89 @@ void OpenSlesWrapper::read_inputs(std::vector< std::vector<SAMPLE> >& inputs)
         for(unsigned j = 0; j < inputs.size(); j++)
         {
             // Automatically handle stereo output
-            short in_sample;
-            if(num_input_channels == 1)
+            OPENSLES_SAMPLE in_sample;
+            if(num_channels == 1)
                 in_sample = input_buffer[i];
             else
-                in_sample = input_buffer[num_input_channels*i + j];
+                in_sample = input_buffer[num_channels*i + j];
 
             // Save to output vector
-            inputs[j][i] = (1.0*in_sample)/32768.0;
+            inputs[j][i] = in_sample/32768.0;
         }
     }
 }
 
 
 OpenSlesWrapper::OpenSlesWrapper()
-    : num_output_channels(2), num_input_channels(1)
+    : num_channels(1)
       //hard code mono in/stereo out
 {
+    logi("Initializing OpenSL ES wrapper\n");
+
     // Create our buffers
-    output_buffer = new OPENSLES_SAMPLE[BUFFER_SIZE*num_output_channels];
-    input_buffer = new OPENSLES_SAMPLE[BUFFER_SIZE*num_input_channels];
+    output_buffer = new OPENSLES_SAMPLE[BUFFER_SIZE*num_channels];
+    input_buffer = new OPENSLES_SAMPLE[BUFFER_SIZE*num_channels];
+
+
+    // Define our audio format
+    SLDataFormat_PCM format_pcm = {
+        SL_DATAFORMAT_PCM,
+        num_channels,
+        SL_SAMPLINGRATE_44_1,
+        SL_PCMSAMPLEFORMAT_FIXED_16,
+        SL_PCMSAMPLEFORMAT_FIXED_16,
+        SL_SPEAKER_FRONT_CENTER,
+        SL_BYTEORDER_LITTLEENDIAN
+    };
+
 
     // Create and start the engine, using the default configuration
-    handle_open_sles_error(slCreateEngine(&engine_object, 
+    check_error("slCreateEngine", slCreateEngine(&engine_object, 
                 0, nullptr, 0, nullptr, nullptr));
-    handle_open_sles_error((*engine_object)->
+    check_error("engine->Realize", (*engine_object)->
             Realize(engine_object, SL_BOOLEAN_FALSE));
-    handle_open_sles_error((*engine_object)->
+    check_error("engine->GetInterface", (*engine_object)->
             GetInterface(engine_object, SL_IID_ENGINE, &engine));
 
 
     // Create the output mixer
-    handle_open_sles_error((*engine)->
+    check_error("CreateOutputMix", (*engine)->
             CreateOutputMix(engine, &output_mix_object, 0, nullptr, nullptr));
-    handle_open_sles_error((*output_mix_object)->
+    check_error("output_mix->Realize", (*output_mix_object)->
             Realize(output_mix_object, SL_BOOLEAN_FALSE));
     
-    // Create the output buffer
-    // First configure the data formatting
+
+    // Create the output player
+    // First configure the audio source
     SLDataLocator_AndroidSimpleBufferQueue loc_bufq = 
             {SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE, 2};
-    SLDataFormat_PCM format_pcm = {
-        SL_DATAFORMAT_PCM,
-        num_output_channels,
-        SL_SAMPLINGRATE_44_1,
-        SL_PCMSAMPLEFORMAT_FIXED_16,
-        SL_PCMSAMPLEFORMAT_FIXED_16,
-        0, // speaker positions - 0 defaults to stereo
-        SL_BYTEORDER_LITTLEENDIAN
-    };
-    SLDataSource audioSrc = {&loc_bufq, &format_pcm};
+    SLDataSource outputSrc = {&loc_bufq, &format_pcm};
 
     // Configure audio sink
     SLDataLocator_OutputMix loc_outmix = 
         {SL_DATALOCATOR_OUTPUTMIX, output_mix_object};
-    SLDataSink audioSnk = {&loc_outmix, NULL};
+    SLDataSink outputSink = {&loc_outmix, NULL};
 
-    // Create player
+    // Create the player
     const SLInterfaceID ids[1] = {SL_IID_ANDROIDSIMPLEBUFFERQUEUE};
     const SLboolean req[1] = {SL_BOOLEAN_TRUE};
-    handle_open_sles_error((*engine)->
-            CreateAudioPlayer(engine, &player_object, &audioSrc, &audioSnk, 2,
+    check_error("CreateAudioPlayer", (*engine)->
+            CreateAudioPlayer(engine, &player_object, &outputSrc, &outputSink, 1,
                 ids, req));
-    handle_open_sles_error((*player_object)->
+    check_error("player->Realize", (*player_object)->
             Realize(player_object, SL_BOOLEAN_FALSE));
-
-    // Get the player interface and the queue out of our object
-    handle_open_sles_error((*player_object)->
+    check_error("player->GetInterface", (*player_object)->
             GetInterface(player_object, SL_IID_PLAY, &player));
-    handle_open_sles_error((*player_object)->
-            GetInterface(player_object, SL_IID_BUFFERQUEUE, &output_buffer_queue));
 
-    // Register our callback function with the queue
-    handle_open_sles_error((*output_buffer_queue)->
+
+    // Configure the output buffer
+    check_error("player->GetInterface(output_buffer_queue)", (*player_object)->
+            GetInterface(player_object, SL_IID_ANDROIDSIMPLEBUFFERQUEUE, 
+                &output_buffer_queue));
+    check_error("output_buffer_queue->RegisterCallback", (*output_buffer_queue)->
             RegisterCallback(output_buffer_queue, output_callback, this));
+    check_error("output_buffer_queue->Clear", (*output_buffer_queue)->
+            Clear(output_buffer_queue) );
 
 
     // Now configure the input system
@@ -143,33 +149,43 @@ OpenSlesWrapper::OpenSlesWrapper()
 
     SLDataLocator_AndroidSimpleBufferQueue loc_bq =
         {SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE, 2};
-    format_pcm.numChannels = num_input_channels;
     SLDataSink inAudioSnk = {&loc_bq, &format_pcm};
 
     // Create input device
-    handle_open_sles_error((*engine)->
+    check_error("CreateAudioRecorder", (*engine)->
             CreateAudioRecorder(engine, &recorder_object, &inAudioSrc, &inAudioSnk, 
                 1, ids, req));
-    handle_open_sles_error((*recorder_object)->
+    check_error("recorder->Realize", (*recorder_object)->
             Realize(recorder_object, SL_BOOLEAN_FALSE));
-    handle_open_sles_error((*recorder_object)->
+    check_error("recorder->GetInterface", (*recorder_object)->
             GetInterface(recorder_object, SL_IID_RECORD, &recorder));
 
-    // Register our input callback
-    handle_open_sles_error((*input_buffer_queue)->RegisterCallback(
-                input_buffer_queue, input_callback, &input_buffer_queue));
+
+    // Configure the input buffer
+    check_error("recorder->GetInterface(input_buffer_queue)", (*recorder_object)->
+            GetInterface(recorder_object, SL_IID_ANDROIDSIMPLEBUFFERQUEUE, 
+                &input_buffer_queue));
+    check_error("output_buffer_queue->RegisterCallback", (*input_buffer_queue)->
+            RegisterCallback(input_buffer_queue, input_callback, 
+                this));
+    check_error("input_buffer_queue->Clear", (*input_buffer_queue)->
+            Clear(input_buffer_queue) );
 
 
     // Begin playing
-    handle_open_sles_error((*player)->
+    check_error("player->SetPlayState(PLAYING)", (*player)->
             SetPlayState(player, SL_PLAYSTATE_PLAYING));
-    handle_open_sles_error((*recorder)->
+    check_error("recorder->SetRecordState(RECORDING)", (*recorder)->
         SetRecordState(recorder,SL_RECORDSTATE_RECORDING));
+
+    logi("Successfully initialized OpenSL ES wrapper\n");
 }
 
 
 OpenSlesWrapper::~OpenSlesWrapper()
 {
+    logi("Destroying OpenSL ES wrapper\n");
+
     // Release the player
     (*player_object)->Destroy(player_object);
 
@@ -181,6 +197,8 @@ OpenSlesWrapper::~OpenSlesWrapper()
 
     // Free the output buffer
     delete output_buffer;
+
+    logi("Successfully destroyed OpenSL ES wrapper\n");
 }
 
 
@@ -189,7 +207,7 @@ void OpenSlesWrapper::output_callback(SLAndroidSimpleBufferQueueItf bq,
 {
     // Unlock the buffer so that we can write the next buffer in
     OpenSlesWrapper* obj = (OpenSlesWrapper*) context;
-    obj->outputLock.unlock();
+    obj->output_lock.unlock();
 }
 
 
@@ -202,11 +220,70 @@ void OpenSlesWrapper::input_callback(SLAndroidSimpleBufferQueueItf bq,
 }
 
 
-void OpenSlesWrapper::handle_open_sles_error(SLresult result)
+void OpenSlesWrapper::check_error(const char* info, SLresult result)
 {
     if(result == SL_RESULT_SUCCESS)
         return;
 
-    // Immediately die
+    // Convert error to string
+    const char* error_string;
+    switch(result)
+    {
+        case SL_RESULT_SUCCESS:
+            error_string = "SL_RESULT_SUCCESS";
+        case SL_RESULT_PRECONDITIONS_VIOLATED:
+            error_string = "SL_RESULT_PRECONDITIONS_VIOLATED";
+            break;
+        case SL_RESULT_PARAMETER_INVALID:
+            error_string = "SL_RESULT_PARAMETER_INVALID";
+            break;
+        case SL_RESULT_MEMORY_FAILURE:
+            error_string = "SL_RESULT_MEMORY_FAILURE";
+            break;
+        case SL_RESULT_RESOURCE_ERROR:
+            error_string = "SL_RESULT_RESOURCE_ERROR";
+            break;
+        case SL_RESULT_RESOURCE_LOST:
+            error_string = "SL_RESULT_RESOURCE_LOST";
+            break;
+        case SL_RESULT_IO_ERROR:
+            error_string = "SL_RESULT_IO_ERROR";
+            break;
+        case SL_RESULT_BUFFER_INSUFFICIENT:
+            error_string = "SL_RESULT_BUFFER_INSUFFICIENT";
+            break;
+        case SL_RESULT_CONTENT_CORRUPTED:
+            error_string = "SL_RESULT_CONTENT_CORRUPTED";
+            break;
+        case SL_RESULT_CONTENT_UNSUPPORTED:
+            error_string = "SL_RESULT_CONTENT_UNSUPPORTED";
+            break;
+        case SL_RESULT_CONTENT_NOT_FOUND:
+            error_string = "SL_RESULT_CONTENT_NOT_FOUND";
+            break;
+        case SL_RESULT_PERMISSION_DENIED:
+            error_string = "SL_RESULT_PERMISSION_DENIED";
+            break;
+        case SL_RESULT_FEATURE_UNSUPPORTED:
+            error_string = "SL_RESULT_FEATURE_UNSUPPORTED";
+            break;
+        case SL_RESULT_INTERNAL_ERROR:
+            error_string = "SL_RESULT_INTERNAL_ERROR";
+            break;
+        case SL_RESULT_UNKNOWN_ERROR:
+            error_string = "SL_RESULT_UNKNOWN_ERROR";
+            break;
+        case SL_RESULT_OPERATION_ABORTED:
+            error_string = "SL_RESULT_OPERATION_ABORTED";
+            break;
+        case SL_RESULT_CONTROL_LOST:
+            error_string = "SL_RESULT_CONTROL_LOST";
+            break;
+        default:
+            error_string = "UNKNOWN ERROR";
+    }
+
+    // Log error and die
+    loge("Received OpenSL ES error (%s): %s\n", info, error_string);
     exit(1);
 }
