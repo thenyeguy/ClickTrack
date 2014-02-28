@@ -1,5 +1,7 @@
 #include <jni.h>
+#include "../src/elementary_filters.h"
 #include "../src/io_elements.h"
+#include "../src/oscillator.h"
 
 
 namespace ClickTrack
@@ -22,10 +24,21 @@ namespace ClickTrack
             void play();
             void pause();
 
+            /* Set volume on our different components
+             */
+            void set_mic_gain(float gain);
+            void set_osc_gain(float gain);
+
         private:
             /* Our signal chain
              */
             Microphone microphone;
+            GainFilter mic_gain;
+
+            SawWave osc;
+            GainFilter osc_gain;
+
+            Adder master_adder;
             Speaker speaker;
 
             /* These
@@ -68,4 +81,13 @@ extern "C"
     JNIEXPORT void JNICALL 
         Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_ClickTrackMasterPause(
                 JNIEnv* jenv, jobject jobj, jlong obj);
+
+    /* These set the gain on our components
+     */
+    JNIEXPORT void JNICALL 
+        Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_ClickTrackMasterSetMicGain(
+                JNIEnv* jenv, jobject jobj, jlong obj, jfloat gain);
+    JNIEXPORT void JNICALL 
+        Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_ClickTrackMasterSetOscGain(
+                JNIEnv* jenv, jobject jobj, jlong obj, jfloat gain);
 }
