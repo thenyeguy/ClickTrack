@@ -1,6 +1,6 @@
-#include <iostream>
 #include <cstdlib>
 #include <cmath>
+#include "logcat.h"
 #include "elementary_filters.h"
 
 using namespace ClickTrack;
@@ -88,7 +88,7 @@ void ClipDetector::filter(std::vector< std::vector<SAMPLE> >& input,
         {
             if(abs(input[i][j]) > 1.0 && next_t+j > next_time)
             {
-                std::cout << "AUDIO CLIPPING DETECTED" << std::endl;
+                loge("AUDIO CLIPPING DETECTED");
                 next_time = next_t+j + rate;
             }
 

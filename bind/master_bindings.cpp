@@ -7,25 +7,20 @@
 
 using namespace ClickTrack;
 
-double currentTimeInMilliseconds()
-{
-    struct timespec res;
-    clock_gettime(CLOCK_REALTIME, &res);
-    return 1000.0 * res.tv_sec + (double) res.tv_nsec / 1e6;
-}
-
 
 ClickTrackMaster::ClickTrackMaster()
-    : microphone(), mic_gain(0.0), osc(440), osc_gain(0.0),
-      master_adder(2), speaker(), state(PAUSED)
+    : microphone(), mic_gain(0.0), osc(440), osc_gain(0.0), sub_synth(10), 
+      sub_synth_gain(0.0), master_adder(3), speaker(), state(PAUSED)
       // Automatically mono
 {
     // Connect the signal chain
     mic_gain.set_input_channel(microphone.get_output_channel());
     osc_gain.set_input_channel(osc.get_output_channel());
+    sub_synth_gain.set_input_channel(sub_synth.get_output_channel());
 
     master_adder.set_input_channel(mic_gain.get_output_channel(), 0);
     master_adder.set_input_channel(osc_gain.get_output_channel(), 1);
+    master_adder.set_input_channel(sub_synth_gain.get_output_channel(), 2);
     speaker.set_input_channel(master_adder.get_output_channel());
 }
 
@@ -38,8 +33,6 @@ ClickTrackMaster::~ClickTrackMaster()
 
 void ClickTrackMaster::play()
 {
-    logi("Playing audio in native, timestamp: %f", currentTimeInMilliseconds());
-
     // If we are already playing in another thread, don't start another loop.
     if(state == PLAYING) 
         return;
@@ -58,8 +51,6 @@ void ClickTrackMaster::play()
 
 void ClickTrackMaster::pause()
 {
-    logi("Pausing audio in native, timestamp: %f", currentTimeInMilliseconds());
-
     if(state == PLAYING)
         state = PAUSING;
 }
@@ -67,17 +58,31 @@ void ClickTrackMaster::pause()
 
 void ClickTrackMaster::set_mic_gain(float gain)
 {
-    logi("Setting mic gain in native to %f, timestamp: %f", gain, currentTimeInMilliseconds());
-
     mic_gain.set_gain(gain);
 }
 
 
 void ClickTrackMaster::set_osc_gain(float gain)
 {
-    logi("Setting osc gain in native to %f, timestamp: %f", gain, currentTimeInMilliseconds());
-
     osc_gain.set_gain(gain);
+}
+
+
+void ClickTrackMaster::set_sub_synth_gain(float gain)
+{
+    sub_synth_gain.set_gain(gain);
+}
+
+
+void ClickTrackMaster::sub_synth_note_down(unsigned note, float velocity)
+{
+    sub_synth.on_note_down(note, velocity);
+}
+
+
+void ClickTrackMaster::sub_synth_note_up(unsigned note, float velocity)
+{
+    sub_synth.on_note_up(note, velocity);
 }
 
 
@@ -125,4 +130,24 @@ void Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_ClickTrackMasterSetOscGain(
 {
     ClickTrackMaster* master = (ClickTrackMaster*) obj;
     master->set_osc_gain(gain);
+}
+void Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_ClickTrackMasterSetSubSynthGain(
+        JNIEnv* jenv, jobject jobj, jlong obj, jfloat gain)
+{
+    ClickTrackMaster* master = (ClickTrackMaster*) obj;
+    master->set_sub_synth_gain(gain);
+}
+
+
+void Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_ClickTrackMasterSubSynthNoteDown(
+        JNIEnv* jenv, jobject jobj, jlong obj, jint note, jfloat velocity)
+{
+    ClickTrackMaster* master = (ClickTrackMaster*) obj;
+    master->sub_synth_note_down(note, velocity);
+}
+void Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_ClickTrackMasterSubSynthNoteUp(
+        JNIEnv* jenv, jobject jobj, jlong obj, jint note, jfloat velocity)
+{
+    ClickTrackMaster* master = (ClickTrackMaster*) obj;
+    master->sub_synth_note_down(note, velocity);
 }

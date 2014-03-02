@@ -25,12 +25,6 @@ namespace ClickTrack
              */
             virtual Channel* get_output_channel();
 
-        protected:
-            /* The constructor for an inherited class must call this function to
-             * add its voices to our internal queues.
-             */
-            void add_voices(std::vector<PolyphonicVoice*>& voices);
-
             /* The following callbacks are used to trigger and update the state
              * of our voices. They are entirely handled by this generic class
              */
@@ -44,6 +38,12 @@ namespace ClickTrack
              * be overriden to handle them
              */
             virtual void on_midi_message(std::vector<unsigned char>* message);
+
+        protected:
+            /* The constructor for an inherited class must call this function to
+             * add its voices to our internal queues.
+             */
+            void add_voices(std::vector<PolyphonicVoice*>& voices);
 
             /* Used by the voice to signal that its note is done playing.
              */ 

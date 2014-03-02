@@ -2,6 +2,7 @@
 #include "../src/elementary_filters.h"
 #include "../src/io_elements.h"
 #include "../src/oscillator.h"
+#include "../src/subtractive_synth.h"
 
 
 namespace ClickTrack
@@ -28,6 +29,12 @@ namespace ClickTrack
              */
             void set_mic_gain(float gain);
             void set_osc_gain(float gain);
+            void set_sub_synth_gain(float gain);
+
+            /* Pass notes to the subtractive synth
+             */
+            void sub_synth_note_down(unsigned note, float velocity);
+            void sub_synth_note_up(unsigned note, float velocity);
 
         private:
             /* Our signal chain
@@ -37,6 +44,9 @@ namespace ClickTrack
 
             SawWave osc;
             GainFilter osc_gain;
+
+            SubtractiveSynth sub_synth;
+            GainFilter sub_synth_gain;
 
             Adder master_adder;
             Speaker speaker;
@@ -90,4 +100,16 @@ extern "C"
     JNIEXPORT void JNICALL 
         Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_ClickTrackMasterSetOscGain(
                 JNIEnv* jenv, jobject jobj, jlong obj, jfloat gain);
+    JNIEXPORT void JNICALL 
+        Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_ClickTrackMasterSetSubSynthGain(
+                JNIEnv* jenv, jobject jobj, jlong obj, jfloat gain);
+
+    /* Play notes on the synth
+     */
+    JNIEXPORT void JNICALL 
+        Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_ClickTrackMasterSubSynthNoteDown(
+                JNIEnv* jenv, jobject jobj, jlong obj, jint note, jfloat velocity);
+    JNIEXPORT void JNICALL 
+        Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_ClickTrackMasterSubSynthNoteUp(
+                JNIEnv* jenv, jobject jobj, jlong obj, jint note, jfloat velocity);
 }
