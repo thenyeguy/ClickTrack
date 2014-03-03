@@ -35,6 +35,16 @@ namespace ClickTrack
              */
             static OpenSlesWrapper& get_instance();
 
+            /* The following will start and stop I/O processing.
+             *
+             * Note that OpenSLES will still finish whatever has been sent to it
+             *
+             * Also note that the stream is NOT automatically started, so you
+             * must call start before you begin
+             */
+            void start();
+            void stop();
+
             /* Send audio out to the system speakers/headphones.
              * This call is blocking.
              */
@@ -47,7 +57,9 @@ namespace ClickTrack
 
 
         private:
-            /* Leave the constructor/destructor private to enforce singleton
+            /* Leave the constructor/destructor private to enforce singleton.
+             * Note that the constructor does NOT automatically start/stop the
+             * stream
              */
             OpenSlesWrapper();
             ~OpenSlesWrapper();

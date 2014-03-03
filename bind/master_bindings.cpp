@@ -9,8 +9,9 @@ using namespace ClickTrack;
 
 
 ClickTrackMaster::ClickTrackMaster()
-    : microphone(), mic_gain(0.0), osc(440), osc_gain(0.0), sub_synth(10), 
-      sub_synth_gain(0.0), master_adder(3), speaker(), state(PAUSED)
+    : state(PAUSED), openSles(OpenSlesWrapper::get_instance()),
+      microphone(), mic_gain(0.0), osc(440), osc_gain(0.0), sub_synth(10), 
+      sub_synth_gain(0.0), master_adder(3), speaker()
       // Automatically mono
 {
     // Connect the signal chain
@@ -28,6 +29,25 @@ ClickTrackMaster::ClickTrackMaster()
 ClickTrackMaster::~ClickTrackMaster()
 {
     //Currently no work to do
+}
+
+
+void ClickTrackMaster::start()
+{
+    // Start the backend
+    openSles.start();
+}
+
+
+void ClickTrackMaster::stop()
+{
+    // Stop playback and wiat for it to finish
+    pause();
+    while(state != PAUSED)
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+    // Stop the backend
+    openSles.stop();
 }
 
 
@@ -56,98 +76,79 @@ void ClickTrackMaster::pause()
 }
 
 
-void ClickTrackMaster::set_mic_gain(float gain)
-{
-    mic_gain.set_gain(gain);
-}
 
 
-void ClickTrackMaster::set_osc_gain(float gain)
-{
-    osc_gain.set_gain(gain);
-}
-
-
-void ClickTrackMaster::set_sub_synth_gain(float gain)
-{
-    sub_synth_gain.set_gain(gain);
-}
-
-
-void ClickTrackMaster::sub_synth_note_down(unsigned note, float velocity)
-{
-    sub_synth.on_note_down(note, velocity);
-}
-
-
-void ClickTrackMaster::sub_synth_note_up(unsigned note, float velocity)
-{
-    sub_synth.on_note_up(note, velocity);
-}
-
-
-
-
-jlong Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_initClickTrackMaster(
-        JNIEnv* jenv, jobject jobj)
+jlong PACKAGE(InitClickTrackMaster)(JNIEnv* jenv, jobject jobj)
 {
     ClickTrackMaster* obj = new ClickTrackMaster();
     return (jlong) obj;
 }
 
-void Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_freeClickTrackMaster(
-        JNIEnv* jenv, jobject jobj, jlong obj)
+void PACKAGE(FreeClickTrackMaster)(JNIEnv* jenv, jobject jobj, jlong obj)
 {
     ClickTrackMaster* master = (ClickTrackMaster*) obj;
     master->pause();
     delete master;
 }
 
-void Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_ClickTrackMasterPlay(
-        JNIEnv* jenv, jobject jobj, jlong obj)
+void PACKAGE(Play)(JNIEnv* jenv, jobject jobj, jlong obj)
 {
     ClickTrackMaster* master = (ClickTrackMaster*) obj;
     std::thread player(&ClickTrackMaster::play, master);
     player.detach();
 }
 
-void Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_ClickTrackMasterPause(
-        JNIEnv* jenv, jobject jobj, jlong obj)
+void PACKAGE(Pause)(JNIEnv* jenv, jobject jobj, jlong obj)
 {
     ClickTrackMaster* master = (ClickTrackMaster*) obj;
     master->pause();
 }
 
+void PACKAGE(Start)(JNIEnv* jenv, jobject jobj, jlong obj)
+{
+    ClickTrackMaster* master = (ClickTrackMaster*) obj;
+    master->start();
+}
 
-void Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_ClickTrackMasterSetMicGain(
-        JNIEnv* jenv, jobject jobj, jlong obj, jfloat gain)
+void PACKAGE(Stop)(JNIEnv* jenv, jobject jobj, jlong obj)
 {
     ClickTrackMaster* master = (ClickTrackMaster*) obj;
-    master->set_mic_gain(gain);
-}
-void Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_ClickTrackMasterSetOscGain(
-        JNIEnv* jenv, jobject jobj, jlong obj, jfloat gain)
-{
-    ClickTrackMaster* master = (ClickTrackMaster*) obj;
-    master->set_osc_gain(gain);
-}
-void Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_ClickTrackMasterSetSubSynthGain(
-        JNIEnv* jenv, jobject jobj, jlong obj, jfloat gain)
-{
-    ClickTrackMaster* master = (ClickTrackMaster*) obj;
-    master->set_sub_synth_gain(gain);
+    master->stop();
 }
 
 
-void Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_ClickTrackMasterSubSynthNoteDown(
-        JNIEnv* jenv, jobject jobj, jlong obj, jint note, jfloat velocity)
+void PACKAGE(MicSetGain)(JNIEnv* jenv, jobject jobj, 
+        jlong obj, jfloat gain)
 {
     ClickTrackMaster* master = (ClickTrackMaster*) obj;
-    master->sub_synth_note_down(note, velocity);
+    master->mic_gain.set_gain(gain);
 }
-void Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_ClickTrackMasterSubSynthNoteUp(
-        JNIEnv* jenv, jobject jobj, jlong obj, jint note, jfloat velocity)
+
+void PACKAGE(OscSetGain)(JNIEnv* jenv, jobject jobj, 
+        jlong obj, jfloat gain)
 {
     ClickTrackMaster* master = (ClickTrackMaster*) obj;
-    master->sub_synth_note_down(note, velocity);
+    master->osc_gain.set_gain(gain);
+
+
+}
+void PACKAGE(SubtractiveSynthSetGain)(JNIEnv* jenv, jobject jobj, 
+        jlong obj, jfloat gain)
+{
+    ClickTrackMaster* master = (ClickTrackMaster*) obj;
+    master->sub_synth_gain.set_gain(gain);
+}
+
+
+void PACKAGE(SubtractiveSynthNoteDown)(JNIEnv* jenv, jobject jobj, 
+        jlong obj, jint note, jfloat velocity)
+{
+    ClickTrackMaster* master = (ClickTrackMaster*) obj;
+    master->sub_synth.on_note_down(note, velocity);
+}
+void PACKAGE(SubtractiveSynthNoteUp)(JNIEnv* jenv, jobject jobj, 
+        jlong obj, jint note, jfloat velocity)
+{
+    ClickTrackMaster* master = (ClickTrackMaster*) obj;
+    master->sub_synth.on_note_up(note, velocity);
 }

@@ -1,6 +1,7 @@
 #include <jni.h>
 #include "../src/elementary_filters.h"
 #include "../src/io_elements.h"
+#include "../src/opensles_wrapper.h"
 #include "../src/oscillator.h"
 #include "../src/subtractive_synth.h"
 
@@ -19,26 +20,37 @@ namespace ClickTrack
             ClickTrackMaster();
             ~ClickTrackMaster();
 
-            /* The play/pause functions will begin/stop audio output. They can
-             * safely be called at any time, regardless of the current state.
+            /* These functions will start up and stop the OpenSL ES stream
+             * objects.
+             *
+             * Note that it is nessecary to stop the object to prevent 
+             * ClickTrack from holding a wakelock.
+             *
+             * Also note that the processing is NOT automatically started, and
+             * must be manually called
+             */
+            void start();
+            void stop();
+
+            /* The play/pause functions will play/pause the audio output. They
+             * can safely be called at any time, regardless of the current
+             * state.
+             *
+             * Note that these do not shut down the audio processing, and will 
+             * maintaina wakelock
              */
             void play();
             void pause();
 
-            /* Set volume on our different components
+            /* These track the current state of our global playback
              */
-            void set_mic_gain(float gain);
-            void set_osc_gain(float gain);
-            void set_sub_synth_gain(float gain);
+            enum MasterState { PAUSED, PAUSING, PLAYING };
+            MasterState state;
 
-            /* Pass notes to the subtractive synth
+            /* Our signal chain. These elements are accessed directly by the JNI
+             * wrapping functions
              */
-            void sub_synth_note_down(unsigned note, float velocity);
-            void sub_synth_note_up(unsigned note, float velocity);
-
-        private:
-            /* Our signal chain
-             */
+            OpenSlesWrapper& openSles;
             Microphone microphone;
             GainFilter mic_gain;
 
@@ -50,11 +62,6 @@ namespace ClickTrack
 
             Adder master_adder;
             Speaker speaker;
-
-            /* These
-             */
-            enum MasterState { PAUSED, PAUSING, PLAYING };
-            MasterState state;
     };
 }
 
@@ -64,52 +71,53 @@ namespace ClickTrack
  * a long so that we may return it up to java. This long is casted back to
  * a pointer within the C++ code to access our object.
  */
+// Concatenate the package name on our functions
+#define PACKAGE(f) Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_native##f
 extern "C"
 {
     /* This function will create a new ClickTrackMaster object and return
      * a pointer to it.
      */
-    JNIEXPORT jlong JNICALL 
-        Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_initClickTrackMaster(
+    JNIEXPORT jlong JNICALL PACKAGE(InitClickTrackMaster)(
                 JNIEnv* jenv, jobject jobj);
 
     /* This frees the ClickTrackMaster object passed into it
      */
-    JNIEXPORT void JNICALL 
-        Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_freeClickTrackMaster(
+    JNIEXPORT void JNICALL PACKAGE(FreeClickTrackMaster)(
+                JNIEnv* jenv, jobject jobj, jlong obj);
+
+    /* These functions start and stop the audio processing. Note that unless the
+     * processing is stopped, OpenSLES will maintain a wakelock
+     */
+    JNIEXPORT void JNICALL PACKAGE(Start)(
+                JNIEnv* jenv, jobject jobj, jlong obj);
+    JNIEXPORT void JNICALL PACKAGE(Stop)(
                 JNIEnv* jenv, jobject jobj, jlong obj);
 
     /* This is a wrapper for ClickTrackMaster::play(). This call spawns another
      * thread and returns after
      */
-    JNIEXPORT void JNICALL 
-        Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_ClickTrackMasterPlay(
+    JNIEXPORT void JNICALL PACKAGE(Play)(
                 JNIEnv* jenv, jobject jobj, jlong obj);
 
     /* This is a wrapper for ClickTrackMaster::pause()
      */
-    JNIEXPORT void JNICALL 
-        Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_ClickTrackMasterPause(
+    JNIEXPORT void JNICALL PACKAGE(Pause)(
                 JNIEnv* jenv, jobject jobj, jlong obj);
 
     /* These set the gain on our components
      */
-    JNIEXPORT void JNICALL 
-        Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_ClickTrackMasterSetMicGain(
+    JNIEXPORT void JNICALL PACKAGE(MicSetGain)(
                 JNIEnv* jenv, jobject jobj, jlong obj, jfloat gain);
-    JNIEXPORT void JNICALL 
-        Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_ClickTrackMasterSetOscGain(
+    JNIEXPORT void JNICALL PACKAGE(OscSetGain)(
                 JNIEnv* jenv, jobject jobj, jlong obj, jfloat gain);
-    JNIEXPORT void JNICALL 
-        Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_ClickTrackMasterSetSubSynthGain(
+    JNIEXPORT void JNICALL PACKAGE(SubtractiveSynthSetGain)(
                 JNIEnv* jenv, jobject jobj, jlong obj, jfloat gain);
 
     /* Play notes on the synth
      */
-    JNIEXPORT void JNICALL 
-        Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_ClickTrackMasterSubSynthNoteDown(
+    JNIEXPORT void JNICALL PACKAGE(SubtractiveSynthNoteDown)(
                 JNIEnv* jenv, jobject jobj, jlong obj, jint note, jfloat velocity);
-    JNIEXPORT void JNICALL 
-        Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_ClickTrackMasterSubSynthNoteUp(
+    JNIEXPORT void JNICALL PACKAGE(SubtractiveSynthNoteUp)(
                 JNIEnv* jenv, jobject jobj, jlong obj, jint note, jfloat velocity);
 }

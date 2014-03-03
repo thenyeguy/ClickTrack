@@ -12,8 +12,39 @@ OpenSlesWrapper& OpenSlesWrapper::get_instance()
 }
 
 
+void OpenSlesWrapper::start()
+{
+    // Only start if stream is not already running
+    if(stream != nullptr)
+        return;
+
+    logi("Starting OpenSL ES playback");
+    stream = android_OpenAudioDevice(SAMPLE_RATE, num_channels, num_channels, 
+            BUFFER_SIZE);
+}
+
+
+void OpenSlesWrapper::stop()
+{
+    // Only stop if stream is running
+    if(stream == nullptr)
+        return;
+
+    logi("Stopping OpenSL ES playback");
+    android_CloseAudioDevice(stream);
+    stream = nullptr;
+}
+
+
 void OpenSlesWrapper::write_outputs(std::vector< std::vector<SAMPLE> >& outputs)
 {
+    // Check for valid stream
+    if(stream == nullptr)
+    {
+        loge("Trying to write to closed OpenSLES stream.");
+        exit(1);
+    }
+
     // Fill our output buffer and interleave
     for(unsigned i = 0; i < BUFFER_SIZE; i++)
     {
@@ -42,6 +73,13 @@ void OpenSlesWrapper::write_outputs(std::vector< std::vector<SAMPLE> >& outputs)
 
 void OpenSlesWrapper::read_inputs(std::vector< std::vector<SAMPLE> >& inputs)
 {
+    // Check for valid stream
+    if(stream == nullptr)
+    {
+        loge("Trying to read from closed OpenSLES stream.");
+        exit(1);
+    }
+
     // Fill the input buffer
     android_AudioIn(stream, input_buffer, num_channels*BUFFER_SIZE);
 
@@ -72,12 +110,9 @@ OpenSlesWrapper::OpenSlesWrapper()
     // Allocate our input buffers
     output_buffer = new SAMPLE[BUFFER_SIZE*num_channels];
     input_buffer = new SAMPLE[BUFFER_SIZE*num_channels];
-
-    // Open our stream object
-    stream = android_OpenAudioDevice(SAMPLE_RATE, num_channels, num_channels, 
-            BUFFER_SIZE);
-
-    logi("Successfully initialized OpenSL ES wrapper");
+    
+    // Start with no stream
+    stream = nullptr;
 }
 
 
@@ -85,12 +120,10 @@ OpenSlesWrapper::~OpenSlesWrapper()
 {
     logi("Destroying OpenSL ES wrapper");
 
-    // CLse our stream object
-    android_CloseAudioDevice(stream);
+    // Stop the stream
+    stop();
 
     // Release our buffers
     delete output_buffer;
     delete input_buffer;
-
-    logi("Successfully destroyed OpenSL ES wrapper");
 }
