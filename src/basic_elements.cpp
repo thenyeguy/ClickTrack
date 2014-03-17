@@ -1,7 +1,12 @@
+<<<<<<< HEAD:src/elementary_filters.cpp
 #include <cstdlib>
 #include <cmath>
 #include "logcat.h"
 #include "elementary_filters.h"
+=======
+#include <iostream>
+#include "basic_elements.h"
+>>>>>>> master:src/basic_elements.cpp
 
 using namespace ClickTrack;
 
@@ -67,6 +72,29 @@ void Multiplier::filter(std::vector< std::vector<SAMPLE> >& input,
         {
             output[0][i] *= input[j][i];
         }
+    }
+}
+
+
+
+
+
+Multiplexer::Multiplexer(unsigned in_num_input_channels)
+    : AudioFilter(in_num_input_channels, 1), channel(0)
+{}
+
+void Multiplexer::select_channel(unsigned in_channel)
+{
+    channel = in_channel;
+}
+
+void Multiplexer::filter(std::vector< std::vector<SAMPLE> >& input,
+        std::vector< std::vector<SAMPLE> >& output)
+{
+    // Sum in the output
+    for(int i = 0; i < FRAME_SIZE; i++)
+    {
+        output[0][i] = input[channel][i];
     }
 }
 

@@ -1,15 +1,15 @@
 #ifndef SUBTRACTIVE_SYNTH_H
 #define SUBTRACTIVE_SYNTH_H
 
-#include "polyphonic_instrument.h"
-#include "elementary_filters.h"
-#include "oscillator.h"
 #include "adsr.h"
+#include "equalizer.h"
+#include "oscillator.h"
+#include "polyphonic_instrument.h"
 
 
 namespace ClickTrack
 {
-    /* This is a subtractive synthesizer controlled over MIDI. It is polyphonic
+    /* This is a subtractive synthesizer controlled over MIDI. It is polyphonic.
      */
     class SubtractiveSynth : public PolyphonicInstrument
     {
@@ -23,10 +23,10 @@ namespace ClickTrack
              */
             Channel* get_output_channel();
 
-        private:
-            /* Add a gain to prevent clipping
+            /* The synth is fed through an EQ at the end of the signal chain.
+             * This EQ is public so as to expose its existing interface
              */
-            GainFilter gain;
+            FourPointEqualizer eq;
     };
 
 
@@ -39,9 +39,9 @@ namespace ClickTrack
 
             /* Callbacks for starting and stopping notes
              */
-            void handle_note_down(float velocity);
-            void handle_note_up();
-            void handle_pitch_wheel(float value);
+            void handle_note_down(float velocity, unsigned long time);
+            void handle_note_up(unsigned long time);
+            void handle_pitch_wheel(float value, unsigned long time);
 
             Channel* get_output_channel();
 

@@ -5,7 +5,7 @@
 #include <map>
 #include "audio_generics.h"
 #include "generic_instrument.h"
-#include "elementary_filters.h"
+#include "basic_elements.h"
 
 namespace ClickTrack
 {
@@ -26,18 +26,19 @@ namespace ClickTrack
             virtual Channel* get_output_channel();
 
             /* The following callbacks are used to trigger and update the state
-             * of our voices. They are entirely handled by this generic class
+             * of our voices. They are entirely handled by this generic class.
              */
-            void on_note_down(unsigned note, float velocity);
-            void on_note_up(unsigned note, float velocity);
-            void on_sustain_down();
-            void on_sustain_up();
-            void on_pitch_wheel(unsigned value);
+            void on_note_down(unsigned note, float velocity, unsigned long time=0);
+            void on_note_up(unsigned note, float velocity, unsigned long time=0);
+            void on_sustain_down(unsigned long time=0);
+            void on_sustain_up(unsigned long time=0);
+            void on_pitch_wheel(unsigned value, unsigned long time=0);
 
             /* Other MIDI messages vary from instrument to instrument. This can
              * be overriden to handle them
              */
-            virtual void on_midi_message(std::vector<unsigned char>* message);
+            virtual void on_midi_message(std::vector<unsigned char>* message,
+                    unsigned long time=0);
 
         protected:
             /* The constructor for an inherited class must call this function to
@@ -80,16 +81,21 @@ namespace ClickTrack
 
             /* Callbacks for starting and stopping notes. The superclass
              * will call the handlers to set audio properties
+             *
+             * Currently, sustain ignores delay
              */
-            void on_note_down(unsigned note, float velocity);
-            void on_note_up();
-            void on_sustain_down();
-            void on_sustain_up();
-            void on_pitch_wheel(float value);
+            void on_note_down(unsigned note, float velocity, 
+                    unsigned long time=0);
+            void on_note_up(unsigned long time=0);
+            void on_sustain_down(unsigned long time=0);
+            void on_sustain_up(unsigned long time=0);
+            void on_pitch_wheel(float value, unsigned long time=0);
 
-            virtual void handle_note_down(float velocity) = 0;
-            virtual void handle_note_up() = 0;
-            virtual void handle_pitch_wheel(float value) = 0;
+            virtual void handle_note_down(float velocity, 
+                    unsigned long time=0) = 0;
+            virtual void handle_note_up(unsigned long time=0) = 0;
+            virtual void handle_pitch_wheel(float value, 
+                    unsigned long time=0) = 0;
 
             /* The output channel must defined by the subclass, as we do not
              * know the signal chain

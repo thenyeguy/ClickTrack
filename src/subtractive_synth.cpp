@@ -7,7 +7,7 @@ using namespace ClickTrack;
 
 
 SubtractiveSynth::SubtractiveSynth(int num_voices)
-    : PolyphonicInstrument(num_voices), gain(0.3)
+    : PolyphonicInstrument(num_voices), eq()
 {
     // Initialize our voices
     std::vector<PolyphonicVoice*> voices;
@@ -18,12 +18,15 @@ SubtractiveSynth::SubtractiveSynth(int num_voices)
     add_voices(voices);
 
     // Configure our signal chain
-    gain.set_input_channel(PolyphonicInstrument::get_output_channel());
+    eq.set_input_channel(PolyphonicInstrument::get_output_channel());
+
+    // Default the eq to quiet so it doesn't clip
+    eq.set_gain(0.3);
 }
 
 Channel* SubtractiveSynth::get_output_channel()
 {
-    return gain.get_output_channel();
+    return eq.get_output_channel();
 }
 
 
@@ -43,26 +46,26 @@ Channel* SubtractiveSynthVoice::get_output_channel()
 }
 
 
-void SubtractiveSynthVoice::handle_note_down(float velocity)
+void SubtractiveSynthVoice::handle_note_down(float velocity, unsigned long time)
 {
-    osc.set_freq(freq*pitch_multiplier);
 
     // Set velocity gain
     // TODO: change this curve
     adsr.set_gain(pow(velocity,0.5));
 
-    // Trigger ADSR
-    adsr.on_note_down();
+    // Trigger frequency and ADSR change
+    osc.set_freq(freq*pitch_multiplier, time);
+    adsr.on_note_down(time);
 }
 
 
-void SubtractiveSynthVoice::handle_note_up()
+void SubtractiveSynthVoice::handle_note_up(unsigned long time)
 {
-    adsr.on_note_up();
+    adsr.on_note_up(time);
 }
 
 
-void SubtractiveSynthVoice::handle_pitch_wheel(float value)
+void SubtractiveSynthVoice::handle_pitch_wheel(float value, unsigned long time)
 {
-    osc.set_freq(freq*pitch_multiplier);
+    osc.set_freq(freq*pitch_multiplier, time);
 }
