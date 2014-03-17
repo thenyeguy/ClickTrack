@@ -1,11 +1,16 @@
-#include <chrono>
 #include <thread>
 #include "master_bindings.h"
 #include "../src/logcat.h"
 
-#include <time.h>
-
 using namespace ClickTrack;
+namespace chr = std::chrono;
+
+
+ClickTrackMaster& ClickTrackMaster::get_instance()
+{
+    static ClickTrackMaster instance;
+    return instance;
+}
 
 
 ClickTrackMaster::ClickTrackMaster()
@@ -23,6 +28,9 @@ ClickTrackMaster::ClickTrackMaster()
     master_adder.set_input_channel(osc_gain.get_output_channel(), 1);
     master_adder.set_input_channel(sub_synth_gain.get_output_channel(), 2);
     speaker.set_input_channel(master_adder.get_output_channel());
+
+    // Register this as the callback for speakers
+    speaker.register_callback(ClickTrackMaster::consumer_callback, this);
 }
 
 
@@ -41,7 +49,7 @@ void ClickTrackMaster::start()
 
 void ClickTrackMaster::stop()
 {
-    // Stop playback and wiat for it to finish
+    // Stop playback and wait for it to finish
     pause();
     while(state != PAUSED)
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -76,79 +84,95 @@ void ClickTrackMaster::pause()
 }
 
 
-
-
-jlong PACKAGE(InitClickTrackMaster)(JNIEnv* jenv, jobject jobj)
+void ClickTrackMaster::consumer_callback(unsigned long time, void* payload)
 {
-    ClickTrackMaster* obj = new ClickTrackMaster();
-    return (jlong) obj;
+    // Store the current time
+    ClickTrackMaster* master = (ClickTrackMaster*) payload;
+    master->buffer_timestamp = chr::high_resolution_clock::now();
+    master->next_buffer_time = time;
 }
 
-void PACKAGE(FreeClickTrackMaster)(JNIEnv* jenv, jobject jobj, jlong obj)
+unsigned long ClickTrackMaster::get_timestamp()
 {
-    ClickTrackMaster* master = (ClickTrackMaster*) obj;
-    master->pause();
-    delete master;
+    unsigned long time = 0;
+    if(next_buffer_time != 0) 
+    {
+        // Compute the time difference
+        auto diff = chr::high_resolution_clock::now() - buffer_timestamp;
+        double nanos = chr::duration_cast<chr::nanoseconds>(diff).count();
+
+        // Convert to a sample delay
+        unsigned long delay = nanos / 1e9 * SAMPLE_RATE;
+
+        // Add this delay, one buffer behind
+        time = next_buffer_time + FRAME_SIZE + delay;
+    }
+    return time;
 }
 
-void PACKAGE(Play)(JNIEnv* jenv, jobject jobj, jlong obj)
+
+
+
+void PACKAGE(play)(JNIEnv* jenv, jobject jobj)
 {
-    ClickTrackMaster* master = (ClickTrackMaster*) obj;
-    std::thread player(&ClickTrackMaster::play, master);
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    std::thread player(&ClickTrackMaster::play, &master);
     player.detach();
 }
 
-void PACKAGE(Pause)(JNIEnv* jenv, jobject jobj, jlong obj)
+void PACKAGE(pause)(JNIEnv* jenv, jobject jobj)
 {
-    ClickTrackMaster* master = (ClickTrackMaster*) obj;
-    master->pause();
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.pause();
 }
 
-void PACKAGE(Start)(JNIEnv* jenv, jobject jobj, jlong obj)
+void PACKAGE(start)(JNIEnv* jenv, jobject jobj)
 {
-    ClickTrackMaster* master = (ClickTrackMaster*) obj;
-    master->start();
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.start();
 }
 
-void PACKAGE(Stop)(JNIEnv* jenv, jobject jobj, jlong obj)
+void PACKAGE(stop)(JNIEnv* jenv, jobject jobj)
 {
-    ClickTrackMaster* master = (ClickTrackMaster*) obj;
-    master->stop();
-}
-
-
-void PACKAGE(MicSetGain)(JNIEnv* jenv, jobject jobj, 
-        jlong obj, jfloat gain)
-{
-    ClickTrackMaster* master = (ClickTrackMaster*) obj;
-    master->mic_gain.set_gain(gain);
-}
-
-void PACKAGE(OscSetGain)(JNIEnv* jenv, jobject jobj, 
-        jlong obj, jfloat gain)
-{
-    ClickTrackMaster* master = (ClickTrackMaster*) obj;
-    master->osc_gain.set_gain(gain);
-
-
-}
-void PACKAGE(SubtractiveSynthSetGain)(JNIEnv* jenv, jobject jobj, 
-        jlong obj, jfloat gain)
-{
-    ClickTrackMaster* master = (ClickTrackMaster*) obj;
-    master->sub_synth_gain.set_gain(gain);
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.stop();
 }
 
 
-void PACKAGE(SubtractiveSynthNoteDown)(JNIEnv* jenv, jobject jobj, 
-        jlong obj, jint note, jfloat velocity)
+void PACKAGE(setMicGain)(JNIEnv* jenv, jobject jobj, 
+        jfloat gain)
 {
-    ClickTrackMaster* master = (ClickTrackMaster*) obj;
-    master->sub_synth.on_note_down(note, velocity);
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.mic_gain.set_gain(gain);
 }
-void PACKAGE(SubtractiveSynthNoteUp)(JNIEnv* jenv, jobject jobj, 
-        jlong obj, jint note, jfloat velocity)
+
+void PACKAGE(setOscGain)(JNIEnv* jenv, jobject jobj, 
+        jfloat gain)
 {
-    ClickTrackMaster* master = (ClickTrackMaster*) obj;
-    master->sub_synth.on_note_up(note, velocity);
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.osc_gain.set_gain(gain);
+
+
+}
+void SUBSYNTH(setGain)(JNIEnv* jenv, jobject jobj, 
+        jfloat gain)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.sub_synth_gain.set_gain(gain);
+}
+
+
+void SUBSYNTH(noteDown)(JNIEnv* jenv, jobject jobj, 
+        jint note, jfloat velocity)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    unsigned long time = master.get_timestamp();
+    master.sub_synth.on_note_down(note, velocity, time);
+}
+void SUBSYNTH(noteUp)(JNIEnv* jenv, jobject jobj, 
+        jint note, jfloat velocity)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    unsigned long time = master.get_timestamp();
+    master.sub_synth.on_note_up(note, velocity, time);
 }

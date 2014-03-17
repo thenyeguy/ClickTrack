@@ -1,12 +1,7 @@
-<<<<<<< HEAD:src/elementary_filters.cpp
 #include <cstdlib>
 #include <cmath>
 #include "logcat.h"
-#include "elementary_filters.h"
-=======
-#include <iostream>
 #include "basic_elements.h"
->>>>>>> master:src/basic_elements.cpp
 
 using namespace ClickTrack;
 
