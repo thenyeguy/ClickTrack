@@ -149,6 +149,8 @@ SAMPLE Oscillator::f()
             return 2*sf - 1;
         }
     }
+
+    return 0;
 }
 
 
