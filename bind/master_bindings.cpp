@@ -71,7 +71,7 @@ void ClickTrackMaster::play()
     // Loop until ended by an outside pause call
     state = PLAYING;
     while(state == PLAYING)
-        speaker.consume_inputs();
+        speaker.consume();
     state = PAUSED;
 }
 
@@ -104,7 +104,7 @@ unsigned long ClickTrackMaster::get_timestamp()
         unsigned long delay = nanos / 1e9 * SAMPLE_RATE;
 
         // Add this delay, one buffer behind
-        time = next_buffer_time + FRAME_SIZE + delay;
+        time = next_buffer_time + BUFFER_SIZE + delay;
     }
     return time;
 }
