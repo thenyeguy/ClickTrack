@@ -78,11 +78,10 @@ namespace ClickTrack
             Microphone microphone;
             GainFilter mic_gain;
 
-            SawWave osc;
+            Oscillator osc;
             GainFilter osc_gain;
 
             SubtractiveSynth sub_synth;
-            GainFilter sub_synth_gain;
 
             Adder master_adder;
             Speaker speaker;
@@ -100,43 +99,87 @@ namespace ClickTrack
 /* The following bindings are wrappers for the ClickTrackMaster class. They all
  * reference the singleton class automagically.
  */
-// Concatenate the package name on our functions
-#define PACKAGE(f) Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_##f
+#define TOP(f) Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_##f
 #define SUBSYNTH(f) Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_00024SubtractiveSynth_##f
 extern "C"
 {
+/*
+ * TOP LEVEL FEATURES
+ */
     /* These functions start and stop the audio processing. Note that unless the
      * processing is stopped, OpenSLES will maintain a wakelock
      */
-    JNIEXPORT void JNICALL PACKAGE(start)(
+    JNIEXPORT void JNICALL TOP(start)(
                 JNIEnv* jenv, jobject jobj);
-    JNIEXPORT void JNICALL PACKAGE(stop)(
+    JNIEXPORT void JNICALL TOP(stop)(
                 JNIEnv* jenv, jobject jobj);
 
     /* This is a wrapper for ClickTrackMaster::play(). This call spawns another
      * thread and returns after
      */
-    JNIEXPORT void JNICALL PACKAGE(play)(
+    JNIEXPORT void JNICALL TOP(play)(
                 JNIEnv* jenv, jobject jobj);
 
     /* This is a wrapper for ClickTrackMaster::pause()
      */
-    JNIEXPORT void JNICALL PACKAGE(pause)(
+    JNIEXPORT void JNICALL TOP(pause)(
                 JNIEnv* jenv, jobject jobj);
 
-    /* These set the gain on our components
+    /* These set the gain on our generic components
      */
-    JNIEXPORT void JNICALL PACKAGE(setMicGain)(
+    JNIEXPORT void JNICALL TOP(setMicGain)(
                 JNIEnv* jenv, jobject jobj, jfloat gain);
-    JNIEXPORT void JNICALL PACKAGE(setOscGain)(
-                JNIEnv* jenv, jobject jobj, jfloat gain);
-    JNIEXPORT void JNICALL SUBSYNTH(setGain)(
+    JNIEXPORT void JNICALL TOP(setOscGain)(
                 JNIEnv* jenv, jobject jobj, jfloat gain);
 
-    /* Play notes on the synth
+
+/* 
+ * SUBTRACTIVE SYNTH FEATURES
+ */
+     /* First set note events
      */
     JNIEXPORT void JNICALL SUBSYNTH(noteDown)(
                 JNIEnv* jenv, jobject jobj, jint note, jfloat velocity);
     JNIEXPORT void JNICALL SUBSYNTH(noteUp)(
                 JNIEnv* jenv, jobject jobj, jint note, jfloat velocity);
+
+    /* Oscillator modes. 
+     * Mode will be an integer constant defined in Java to match the enum
+     */
+    JNIEXPORT void JNICALL SUBSYNTH(setOsc1Mode)(
+                JNIEnv* jenv, jobject jobj, jint mode);
+    JNIEXPORT void JNICALL SUBSYNTH(setOsc2Mode)(
+                JNIEnv* jenv, jobject jobj, jint mode);
+
+    /* ADSR Envelope
+     */
+    JNIEXPORT void JNICALL SUBSYNTH(set_attack_time)(
+                JNIEnv* jenv, jobject jobj, jfloat attack_time);
+    JNIEXPORT void JNICALL SUBSYNTH(set_decay_time)(
+                JNIEnv* jenv, jobject jobj, jfloat decay_time);
+    JNIEXPORT void JNICALL SUBSYNTH(set_sustain_level)(
+                JNIEnv* jenv, jobject jobj, jfloat sustain_level);
+    JNIEXPORT void JNICALL SUBSYNTH(set_release_time)(
+                JNIEnv* jenv, jobject jobj, jfloat release_time);
+
+    /* Equalizer. Filter mode is a set of integer constants in Java
+     */
+    JNIEXPORT void JNICALL SUBSYNTH(setPoint1)(
+                JNIEnv* jenv, jobject jobj, jint mode, jfloat cutoff, 
+                jfloat gain);
+    JNIEXPORT void JNICALL SUBSYNTH(setPoint4)(
+                JNIEnv* jenv, jobject jobj, jint mode, jfloat cutoff, 
+                jfloat gain);
+
+    JNIEXPORT void JNICALL SUBSYNTH(setPoint2)(
+                JNIEnv* jenv, jobject jobj, jfloat cutoff, jfloat Q, 
+                jfloat gain);
+    JNIEXPORT void JNICALL SUBSYNTH(setPoint3)(
+                JNIEnv* jenv, jobject jobj, jfloat cutoff, jfloat Q, 
+                jfloat gain);
+
+    /* Final output gain
+     */
+    JNIEXPORT void JNICALL SUBSYNTH(setGain)(
+                JNIEnv* jenv, jobject jobj, jfloat gain);
 }
