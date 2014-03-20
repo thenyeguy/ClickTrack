@@ -15,18 +15,16 @@ ClickTrackMaster& ClickTrackMaster::get_instance()
 
 ClickTrackMaster::ClickTrackMaster()
     : state(PAUSED), openSles(OpenSlesWrapper::get_instance()),
-      microphone(), mic_gain(0.0), osc(440, Oscillator::BlepSaw), osc_gain(0.0),
-      sub_synth(10), master_adder(3), speaker()
+      sub_synth(10), drum_machine(""), master_adder(2), 
+      reverb(MoorerReverb::HALL, 1.0, 1.0, 0.0, 1), speaker()
       // Automatically mono
 {
     // Connect the signal chain
-    mic_gain.set_input_channel(microphone.get_output_channel());
-    osc_gain.set_input_channel(osc.get_output_channel());
+    master_adder.set_input_channel(sub_synth.get_output_channel(), 0);
+    master_adder.set_input_channel(drum_machine.get_output_channel(), 1);
 
-    master_adder.set_input_channel(mic_gain.get_output_channel(), 0);
-    master_adder.set_input_channel(osc_gain.get_output_channel(), 1);
-    master_adder.set_input_channel(sub_synth.get_output_channel(), 2);
-    speaker.set_input_channel(master_adder.get_output_channel());
+    reverb.set_input_channel(master_adder.get_output_channel());
+    speaker.set_input_channel(reverb.get_output_channel());
 
     // Register this as the callback for speakers
     speaker.register_callback(ClickTrackMaster::timing_callback, this);
@@ -91,6 +89,7 @@ void ClickTrackMaster::timing_callback(unsigned long time, void* payload)
     master->next_buffer_time = time;
 }
 
+
 unsigned long ClickTrackMaster::get_timestamp()
 {
     unsigned long time = 0;
@@ -112,7 +111,7 @@ unsigned long ClickTrackMaster::get_timestamp()
 
 
 
-void TOP(play)(JNIEnv* jenv, jobject jobj)
+void MASTER(play)(JNIEnv* jenv, jobject jobj)
 {
     ClickTrackMaster& master = ClickTrackMaster::get_instance();
     std::thread player(&ClickTrackMaster::play, &master);
@@ -120,40 +119,43 @@ void TOP(play)(JNIEnv* jenv, jobject jobj)
 }
 
 
-void TOP(pause)(JNIEnv* jenv, jobject jobj)
+void MASTER(pause)(JNIEnv* jenv, jobject jobj)
 {
     ClickTrackMaster& master = ClickTrackMaster::get_instance();
     master.pause();
 }
 
 
-void TOP(start)(JNIEnv* jenv, jobject jobj)
+void MASTER(start)(JNIEnv* jenv, jobject jobj)
 {
     ClickTrackMaster& master = ClickTrackMaster::get_instance();
     master.start();
 }
 
 
-void TOP(stop)(JNIEnv* jenv, jobject jobj)
+void MASTER(stop)(JNIEnv* jenv, jobject jobj)
 {
     ClickTrackMaster& master = ClickTrackMaster::get_instance();
     master.stop();
 }
 
 
-void TOP(setMicGain)(JNIEnv* jenv, jobject jobj, 
-        jfloat gain)
+
+
+void REVERB(setRevTime)(JNIEnv* jenv, jobject jobj, jfloat rev_time)
 {
     ClickTrackMaster& master = ClickTrackMaster::get_instance();
-    master.mic_gain.set_gain(gain);
+    master.reverb.set_rev_time(rev_time);
 }
-
-
-void TOP(setOscGain)(JNIEnv* jenv, jobject jobj, 
-        jfloat gain)
+void REVERB(setGain)(JNIEnv* jenv, jobject jobj, jfloat gain)
 {
     ClickTrackMaster& master = ClickTrackMaster::get_instance();
-    master.osc_gain.set_gain(gain);
+    master.reverb.set_gain(gain);
+}
+void REVERB(setWetness)(JNIEnv* jenv, jobject jobj, jfloat wetness)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.reverb.set_wetness(wetness);
 }
 
 
@@ -260,4 +262,28 @@ void SUBSYNTH(setGain)(JNIEnv* jenv, jobject jobj,
 {
     ClickTrackMaster& master = ClickTrackMaster::get_instance();
     master.sub_synth.volume.set_gain(gain);
+}
+
+
+void DRUMMACHINE(noteDown)(JNIEnv* jenv, jobject jobj, jint note, 
+        jfloat velocity)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    unsigned long time = master.get_timestamp();
+    master.drum_machine.on_note_down(note, velocity, time);
+}
+
+
+void DRUMMACHINE(setVoice)(JNIEnv* jenv, jobject jobj, jstring jpath)
+{
+    // Get the path from the jstring
+    const char *s = jenv->GetStringUTFChars(jpath,NULL);
+    std::string path(s);
+
+    // Set the new voice
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.drum_machine.set_voice(path);
+
+    // Release the string
+    jenv->ReleaseStringUTFChars(jpath,s);
 }

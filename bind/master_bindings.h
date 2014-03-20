@@ -1,9 +1,11 @@
 #include <chrono>
 #include <jni.h>
 #include "../src/basic_elements.h"
+#include "../src/drum_machine.h"
 #include "../src/io_elements.h"
 #include "../src/opensles_wrapper.h"
 #include "../src/oscillator.h"
+#include "../src/reverb.h"
 #include "../src/subtractive_synth.h"
 
 
@@ -75,16 +77,13 @@ namespace ClickTrack
              * wrapping functions
              */
             OpenSlesWrapper& openSles;
-            Microphone microphone;
-            GainFilter mic_gain;
-
-            Oscillator osc;
-            GainFilter osc_gain;
 
             SubtractiveSynth sub_synth;
+            DrumMachine      drum_machine;
 
-            Adder master_adder;
-            Speaker speaker;
+            Adder        master_adder;
+            MoorerReverb reverb;
+            Speaker      speaker;
 
         protected:
             /* Constructor/destructor handles our entire audio chain. Protected
@@ -99,87 +98,98 @@ namespace ClickTrack
 /* The following bindings are wrappers for the ClickTrackMaster class. They all
  * reference the singleton class automagically.
  */
-#define TOP(f) Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_##f
+#define MASTER(f) Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_##f
+#define REVERB(f) Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_00024Reverb_##f
 #define SUBSYNTH(f) Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_00024SubtractiveSynth_##f
+#define DRUMMACHINE(f) Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_00024DrumMachine##f
 extern "C"
 {
 /*
- * TOP LEVEL FEATURES
+ * MASTER CHANNEL FEATURES
  */
     /* These functions start and stop the audio processing. Note that unless the
      * processing is stopped, OpenSLES will maintain a wakelock
      */
-    JNIEXPORT void JNICALL TOP(start)(
-                JNIEnv* jenv, jobject jobj);
-    JNIEXPORT void JNICALL TOP(stop)(
-                JNIEnv* jenv, jobject jobj);
+    JNIEXPORT void JNICALL MASTER(start)(JNIEnv* jenv, jobject jobj);
+    JNIEXPORT void JNICALL MASTER(stop)(JNIEnv* jenv, jobject jobj);
 
     /* This is a wrapper for ClickTrackMaster::play(). This call spawns another
      * thread and returns after
      */
-    JNIEXPORT void JNICALL TOP(play)(
-                JNIEnv* jenv, jobject jobj);
+    JNIEXPORT void JNICALL MASTER(play)(JNIEnv* jenv, jobject jobj);
 
     /* This is a wrapper for ClickTrackMaster::pause()
-     */
-    JNIEXPORT void JNICALL TOP(pause)(
-                JNIEnv* jenv, jobject jobj);
+    */
+    JNIEXPORT void JNICALL MASTER(pause)(JNIEnv* jenv, jobject jobj);
 
-    /* These set the gain on our generic components
-     */
-    JNIEXPORT void JNICALL TOP(setMicGain)(
-                JNIEnv* jenv, jobject jobj, jfloat gain);
-    JNIEXPORT void JNICALL TOP(setOscGain)(
-                JNIEnv* jenv, jobject jobj, jfloat gain);
+
+/*
+ * MASTER CHANNEL REVERB
+ */
+    JNIEXPORT void JNICALL REVERB(setRevTime)(JNIEnv* jenv, jobject jobj,
+            jfloat rev_time);
+    JNIEXPORT void JNICALL REVERB(setGain)(JNIEnv* jenv, jobject jobj,
+            jfloat gain);
+    JNIEXPORT void JNICALL REVERB(setWetness)(JNIEnv* jenv, jobject jobj,
+            jfloat wetness);
 
 
 /* 
  * SUBTRACTIVE SYNTH FEATURES
  */
-     /* First set note events
-     */
-    JNIEXPORT void JNICALL SUBSYNTH(noteDown)(
-                JNIEnv* jenv, jobject jobj, jint note, jfloat velocity);
-    JNIEXPORT void JNICALL SUBSYNTH(noteUp)(
-                JNIEnv* jenv, jobject jobj, jint note, jfloat velocity);
+    /* First set note events
+    */
+    JNIEXPORT void JNICALL SUBSYNTH(noteDown)(JNIEnv* jenv, jobject jobj,
+            jint note, jfloat velocity);
+    JNIEXPORT void JNICALL SUBSYNTH(noteUp)(JNIEnv* jenv, jobject jobj,
+            jint note, jfloat velocity);
 
     /* Oscillator modes. 
      * Mode will be an integer constant defined in Java to match the enum
      */
-    JNIEXPORT void JNICALL SUBSYNTH(setOsc1Mode)(
-                JNIEnv* jenv, jobject jobj, jint mode);
-    JNIEXPORT void JNICALL SUBSYNTH(setOsc2Mode)(
-                JNIEnv* jenv, jobject jobj, jint mode);
+    JNIEXPORT void JNICALL SUBSYNTH(setOsc1Mode)(JNIEnv* jenv, jobject jobj,
+            jint mode);
+    JNIEXPORT void JNICALL SUBSYNTH(setOsc2Mode)(JNIEnv* jenv, jobject jobj,
+            jint mode);
 
     /* ADSR Envelope
-     */
-    JNIEXPORT void JNICALL SUBSYNTH(set_attack_time)(
-                JNIEnv* jenv, jobject jobj, jfloat attack_time);
-    JNIEXPORT void JNICALL SUBSYNTH(set_decay_time)(
-                JNIEnv* jenv, jobject jobj, jfloat decay_time);
-    JNIEXPORT void JNICALL SUBSYNTH(set_sustain_level)(
-                JNIEnv* jenv, jobject jobj, jfloat sustain_level);
-    JNIEXPORT void JNICALL SUBSYNTH(set_release_time)(
-                JNIEnv* jenv, jobject jobj, jfloat release_time);
+    */
+    JNIEXPORT void JNICALL SUBSYNTH(set_attack_time)(JNIEnv* jenv, jobject jobj,
+            jfloat attack_time);
+    JNIEXPORT void JNICALL SUBSYNTH(set_decay_time)(JNIEnv* jenv, jobject jobj,
+            jfloat decay_time);
+    JNIEXPORT void JNICALL SUBSYNTH(set_sustain_level)(JNIEnv* jenv, jobject jobj,
+            jfloat sustain_level);
+    JNIEXPORT void JNICALL SUBSYNTH(set_release_time)(JNIEnv* jenv, jobject jobj,
+            jfloat release_time);
 
     /* Equalizer. Filter mode is a set of integer constants in Java
-     */
-    JNIEXPORT void JNICALL SUBSYNTH(setPoint1)(
-                JNIEnv* jenv, jobject jobj, jint mode, jfloat cutoff, 
-                jfloat gain);
-    JNIEXPORT void JNICALL SUBSYNTH(setPoint4)(
-                JNIEnv* jenv, jobject jobj, jint mode, jfloat cutoff, 
-                jfloat gain);
+    */
+    JNIEXPORT void JNICALL SUBSYNTH(setPoint1)(JNIEnv* jenv, jobject jobj,
+            jint mode, jfloat cutoff, jfloat gain);
+    JNIEXPORT void JNICALL SUBSYNTH(setPoint4)(JNIEnv* jenv, jobject jobj,
+            jint mode, jfloat cutoff, jfloat gain);
 
-    JNIEXPORT void JNICALL SUBSYNTH(setPoint2)(
-                JNIEnv* jenv, jobject jobj, jfloat cutoff, jfloat Q, 
-                jfloat gain);
-    JNIEXPORT void JNICALL SUBSYNTH(setPoint3)(
-                JNIEnv* jenv, jobject jobj, jfloat cutoff, jfloat Q, 
-                jfloat gain);
+    JNIEXPORT void JNICALL SUBSYNTH(setPoint2)(JNIEnv* jenv, jobject jobj,
+            jfloat cutoff, jfloat Q, jfloat gain);
+    JNIEXPORT void JNICALL SUBSYNTH(setPoint3)(JNIEnv* jenv, jobject jobj,
+            jfloat cutoff, jfloat Q, jfloat gain);
 
     /* Final output gain
-     */
-    JNIEXPORT void JNICALL SUBSYNTH(setGain)(
-                JNIEnv* jenv, jobject jobj, jfloat gain);
+    */
+    JNIEXPORT void JNICALL SUBSYNTH(setGain)(JNIEnv* jenv, jobject jobj,
+            jfloat gain);
+
+/* 
+ * DRUM MACHINE FEATURES
+ */
+    /* First set note events
+    */
+    JNIEXPORT void JNICALL DRUMMACHINE(noteDown)(JNIEnv* jenv, jobject jobj,
+            jint note, jfloat velocity);
+
+    /* Setter for the voice
+    */
+    JNIEXPORT void JNICALL DRUMMACHINE(setVoice)(JNIEnv* jenv, jobject jobj,
+            jstring path);
 }
