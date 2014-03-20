@@ -29,7 +29,7 @@ ClickTrackMaster::ClickTrackMaster()
     speaker.set_input_channel(master_adder.get_output_channel());
 
     // Register this as the callback for speakers
-    speaker.register_callback(ClickTrackMaster::consumer_callback, this);
+    speaker.register_callback(ClickTrackMaster::timing_callback, this);
 }
 
 
@@ -83,7 +83,7 @@ void ClickTrackMaster::pause()
 }
 
 
-void ClickTrackMaster::consumer_callback(unsigned long time, void* payload)
+void ClickTrackMaster::timing_callback(unsigned long time, void* payload)
 {
     // Store the current time
     ClickTrackMaster* master = (ClickTrackMaster*) payload;

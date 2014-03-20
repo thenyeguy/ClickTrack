@@ -59,7 +59,7 @@ namespace ClickTrack
              * get_timestamp() returns the proper sample timestamp for an event
              * triggered at the current moment
              */
-            static void consumer_callback(unsigned long time, void* payload);
+            static void timing_callback(unsigned long time, void* payload);
             unsigned long get_timestamp();
 
             std::chrono::time_point<std::chrono::high_resolution_clock,
