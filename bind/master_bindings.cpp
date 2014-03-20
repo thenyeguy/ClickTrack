@@ -274,6 +274,13 @@ void DRUMMACHINE(noteDown)(JNIEnv* jenv, jobject jobj, jint note,
 }
 
 
+void DRUMMACHINE(setGain)(JNIEnv* jenv, jobject jobj, jfloat gain)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.drum_machine.volume.set_gain(gain);
+}
+
+
 void DRUMMACHINE(setVoice)(JNIEnv* jenv, jobject jobj, jstring jpath)
 {
     // Get the path from the jstring

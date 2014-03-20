@@ -188,8 +188,10 @@ extern "C"
     JNIEXPORT void JNICALL DRUMMACHINE(noteDown)(JNIEnv* jenv, jobject jobj,
             jint note, jfloat velocity);
 
-    /* Setter for the voice
+    /* Setters
     */
+    JNIEXPORT void JNICALL DRUMMACHINE(setGain)(JNIEnv* jenv, jobject jobj,
+            jfloat gain);
     JNIEXPORT void JNICALL DRUMMACHINE(setVoice)(JNIEnv* jenv, jobject jobj,
             jstring path);
 }
