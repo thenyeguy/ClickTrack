@@ -15,7 +15,7 @@ ClickTrackMaster& ClickTrackMaster::get_instance()
 
 ClickTrackMaster::ClickTrackMaster()
     : state(PAUSED), openSles(OpenSlesWrapper::get_instance()),
-      sub_synth(10), drum_machine(""), master_adder(2), 
+      mic(), sub_synth(10), drum_machine(""), master_adder(2), 
       reverb(MoorerReverb::HALL, 1.0, 1.0, 0.0, 1), speaker()
       // Automatically mono
 {
@@ -24,7 +24,7 @@ ClickTrackMaster::ClickTrackMaster()
     master_adder.set_input_channel(drum_machine.get_output_channel(), 1);
 
     reverb.set_input_channel(master_adder.get_output_channel());
-    speaker.set_input_channel(reverb.get_output_channel());
+    speaker.set_input_channel(master_adder.get_output_channel());
 
     // Register this as the callback for speakers
     speaker.register_callback(ClickTrackMaster::timing_callback, this);

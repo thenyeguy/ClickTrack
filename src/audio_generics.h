@@ -198,7 +198,7 @@ namespace ClickTrack
             /* Statically allocated frame for speed. Seperate from the
              * generator's output to maintain clean interface
              */
-            std::vector<SAMPLE> output_frame;
+            std::vector< std::vector<SAMPLE> > output_frames;
     };
 
 

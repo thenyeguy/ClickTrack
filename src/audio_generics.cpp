@@ -65,12 +65,15 @@ Channel* AudioGenerator::get_output_channel(unsigned i)
 
 void AudioGenerator::generate()
 {
-    generate_outputs(output_frame, next_out_t);
-    next_out_t++;
+    for(unsigned t=0; t < BUFFER_SIZE; t++)
+    {
+        generate_outputs(output_frame, next_out_t);
+        next_out_t++;
 
-    //Write the outputs into the channel
-    for(int i = 0; i < output_channels.size(); i++)
-        output_channels[i].push_sample(output_frame[i]);
+        //Write the outputs into the channel
+        for(int i = 0; i < output_channels.size(); i++)
+            output_channels[i].push_sample(output_frame[i]);
+    }
 }
 
 
@@ -126,26 +129,29 @@ unsigned AudioConsumer::get_num_input_channels()
 
 void AudioConsumer::consume()
 {
-    // Read in each channel
-    lock.lock();
-    for(unsigned i = 0; i < input_channels.size(); i++)
+    for(unsigned t=0; t < BUFFER_SIZE; t++)
     {
-        // If there is no channel currently, read in silence
-        if(input_channels[i] == NULL)
+        // Read in each channel
+        lock.lock();
+        for(unsigned i = 0; i < input_channels.size(); i++)
         {
-            //std::cerr << "The requested channel is not connected" << std::endl;
-            input_frame[i] = 0.0;
+            // If there is no channel currently, read in silence
+            if(input_channels[i] == NULL)
+            {
+                //std::cerr << "The requested channel is not connected" << std::endl;
+                input_frame[i] = 0.0;
+            }
+            else
+            {
+                input_frame[i] = input_channels[i]->get_sample(next_in_t);
+            }
         }
-        else
-        {
-            input_frame[i] = input_channels[i]->get_sample(next_in_t);
-        }
-    }
-    lock.unlock();
+        lock.unlock();
 
-    // Process
-    process_inputs(input_frame, next_in_t);
-    next_in_t++;
+        // Process
+        process_inputs(input_frame, next_in_t);
+        next_in_t++;
+    }
 }
 
 
@@ -160,28 +166,33 @@ unsigned long AudioConsumer::get_next_time()
 AudioFilter::AudioFilter(unsigned in_num_input_channels,
         unsigned in_num_output_channels)
     : AudioGenerator(in_num_output_channels),
-      AudioConsumer(in_num_input_channels), output_frame()
+      AudioConsumer(in_num_input_channels), output_frames()
 {
-    for(unsigned i = 0; i < in_num_output_channels; i++)
+    for(unsigned t = 0; t < BUFFER_SIZE; t++)
     {
-        output_frame.push_back(0.0);
+        output_frames.push_back(std::vector<SAMPLE>(in_num_output_channels));
+        for(unsigned i = 0; i < in_num_output_channels; i++)
+        {
+            output_frames[t].push_back(0.0);
+        }
     }
 }
 
 
 void AudioFilter::generate_outputs(std::vector<SAMPLE>& outputs, unsigned long t)
 {
-    consume();
+    if(t % BUFFER_SIZE == 0)
+        consume();
     
     // Copy our outputs to the final output buffer
     for(unsigned i = 0; i <= outputs.size(); i++)
-        outputs[i] = output_frame[i];
+        outputs[i] = output_frames[t%BUFFER_SIZE][i];
 }
 
 
 void AudioFilter::process_inputs(std::vector<SAMPLE>& inputs, unsigned long t)
 {
-    filter(inputs, output_frame, t);
+    filter(inputs, output_frames[t%BUFFER_SIZE], t);
 }
 
 

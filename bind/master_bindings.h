@@ -78,6 +78,7 @@ namespace ClickTrack
              */
             OpenSlesWrapper& openSles;
 
+            Microphone       mic;
             SubtractiveSynth sub_synth;
             DrumMachine      drum_machine;
 
@@ -101,7 +102,7 @@ namespace ClickTrack
 #define MASTER(f) Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_##f
 #define REVERB(f) Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_00024Reverb_##f
 #define SUBSYNTH(f) Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_00024SubtractiveSynth_##f
-#define DRUMMACHINE(f) Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_00024DrumMachine##f
+#define DRUMMACHINE(f) Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_00024DrumMachine_##f
 extern "C"
 {
 /*
