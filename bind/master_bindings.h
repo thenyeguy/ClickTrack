@@ -99,10 +99,10 @@ namespace ClickTrack
 /* The following bindings are wrappers for the ClickTrackMaster class. They all
  * reference the singleton class automagically.
  */
-#define MASTER(f) Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_##f
-#define REVERB(f) Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_00024Reverb_##f
-#define SUBSYNTH(f) Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_00024SubtractiveSynth_##f
-#define DRUMMACHINE(f) Java_edu_cmu_ece_ece551_clicktrack_ClickTrack_00024DrumMachine_##f
+#define MASTER(f) Java_edu_cmu_ece_ece551_clicktrack_NativeClickTrack_##f
+#define REVERB(f) Java_edu_cmu_ece_ece551_clicktrack_NativeClickTrack_00024Reverb_##f
+#define SUBSYNTH(f) Java_edu_cmu_ece_ece551_clicktrack_NativeClickTrack_00024SubtractiveSynth_##f
+#define DRUMMACHINE(f) Java_edu_cmu_ece_ece551_clicktrack_NativeClickTrack_00024DrumMachine_##f
 extern "C"
 {
 /*
@@ -155,13 +155,13 @@ extern "C"
 
     /* ADSR Envelope
     */
-    JNIEXPORT void JNICALL SUBSYNTH(set_attack_time)(JNIEnv* jenv, jobject jobj,
+    JNIEXPORT void JNICALL SUBSYNTH(setAttackTime)(JNIEnv* jenv, jobject jobj,
             jfloat attack_time);
-    JNIEXPORT void JNICALL SUBSYNTH(set_decay_time)(JNIEnv* jenv, jobject jobj,
+    JNIEXPORT void JNICALL SUBSYNTH(setDecayTime)(JNIEnv* jenv, jobject jobj,
             jfloat decay_time);
-    JNIEXPORT void JNICALL SUBSYNTH(set_sustain_level)(JNIEnv* jenv, jobject jobj,
+    JNIEXPORT void JNICALL SUBSYNTH(setSustainLevel)(JNIEnv* jenv, jobject jobj,
             jfloat sustain_level);
-    JNIEXPORT void JNICALL SUBSYNTH(set_release_time)(JNIEnv* jenv, jobject jobj,
+    JNIEXPORT void JNICALL SUBSYNTH(setReleaseTime)(JNIEnv* jenv, jobject jobj,
             jfloat release_time);
 
     /* Equalizer. Filter mode is a set of integer constants in Java

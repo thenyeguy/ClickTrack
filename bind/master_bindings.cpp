@@ -193,21 +193,21 @@ void SUBSYNTH(setOsc2Mode)(JNIEnv* jenv, jobject jobj, jint mode)
 }
 
 
-void SUBSYNTH(set_attack_time)(JNIEnv* jenv, jobject jobj, jfloat attack_time)
+void SUBSYNTH(setAttackTime)(JNIEnv* jenv, jobject jobj, jfloat attack_time)
 {
     ClickTrackMaster& master = ClickTrackMaster::get_instance();
     master.sub_synth.set_attack_time(attack_time);
 }
 
 
-void SUBSYNTH(set_decay_time)(JNIEnv* jenv, jobject jobj, jfloat decay_time)
+void SUBSYNTH(setDecayTime)(JNIEnv* jenv, jobject jobj, jfloat decay_time)
 {
     ClickTrackMaster& master = ClickTrackMaster::get_instance();
     master.sub_synth.set_decay_time(decay_time);
 }
 
 
-void SUBSYNTH(set_sustain_level)(JNIEnv* jenv, jobject jobj, jfloat
+void SUBSYNTH(setSustainLevel)(JNIEnv* jenv, jobject jobj, jfloat
         sustain_level)
 {
     ClickTrackMaster& master = ClickTrackMaster::get_instance();
@@ -215,7 +215,7 @@ void SUBSYNTH(set_sustain_level)(JNIEnv* jenv, jobject jobj, jfloat
 }
 
 
-void SUBSYNTH(set_release_time)(JNIEnv* jenv, jobject jobj, jfloat
+void SUBSYNTH(setReleaseTime)(JNIEnv* jenv, jobject jobj, jfloat
         release_time)
 {
     ClickTrackMaster& master = ClickTrackMaster::get_instance();
