@@ -111,6 +111,12 @@ unsigned long ClickTrackMaster::get_timestamp()
 
 
 
+void MASTER(setBufferSize)(JNIEnv* jenv, jobject jobj, jint size)
+{
+    BUFFER_SIZE = size;
+}
+
+
 void MASTER(play)(JNIEnv* jenv, jobject jobj)
 {
     ClickTrackMaster& master = ClickTrackMaster::get_instance();

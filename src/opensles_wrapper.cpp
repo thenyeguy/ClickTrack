@@ -5,6 +5,9 @@
 using namespace ClickTrack;
 
 
+unsigned ClickTrack::BUFFER_SIZE = 1024;
+
+
 OpenSlesWrapper& OpenSlesWrapper::get_instance()
 {
     static OpenSlesWrapper instance;
@@ -18,7 +21,7 @@ void OpenSlesWrapper::start()
     if(stream != nullptr)
         return;
 
-    logi("Starting OpenSL ES playback");
+    logi("Starting OpenSL ES playback with buffer size: %u", BUFFER_SIZE);
     stream = android_OpenAudioDevice(SAMPLE_RATE, num_channels, num_channels, 
             BUFFER_SIZE);
 }

@@ -11,7 +11,7 @@ namespace ClickTrack
 {
     /* This determines the size of our internal ring buffers.
      */
-    const unsigned DEFAULT_RINGBUFFER_SIZE = BUFFER_SIZE;
+    const unsigned DEFAULT_RINGBUFFER_SIZE = 44100;
 
 
     /* An output channel is the basic unit with which an object receives audio.

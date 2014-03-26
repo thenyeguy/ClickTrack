@@ -18,7 +18,7 @@ namespace ClickTrack
     typedef float SAMPLE;
     typedef signed short OPENSLES_SAMPLE;
     const unsigned SAMPLE_RATE = 44100;
-    const unsigned BUFFER_SIZE = 2048;
+    extern unsigned BUFFER_SIZE;
 
 
     /* The OpenSlesWrapper is a C++ wrapping class for the native sound library.

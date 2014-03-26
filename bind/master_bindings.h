@@ -108,6 +108,11 @@ extern "C"
 /*
  * MASTER CHANNEL FEATURES
  */
+    /* This function can be used to set the buffer size used for processing
+     */
+    JNIEXPORT void JNICALL MASTER(setBufferSize)(JNIEnv* jenv, jobject jobj, 
+            jint size);
+
     /* These functions start and stop the audio processing. Note that unless the
      * processing is stopped, OpenSLES will maintain a wakelock
      */
