@@ -1,4 +1,5 @@
 #include <thread>
+#include <sys/resource.h>
 #include "master_bindings.h"
 #include "../src/logcat.h"
 
@@ -15,7 +16,7 @@ ClickTrackMaster& ClickTrackMaster::get_instance()
 
 ClickTrackMaster::ClickTrackMaster()
     : state(PAUSED), openSles(OpenSlesWrapper::get_instance()),
-      mic(), sub_synth(10), drum_machine(""), master_adder(2), 
+      mic(), sub_synth(5), drum_machine(""), master_adder(2), 
       reverb(MoorerReverb::HALL, 1.0, 1.0, 0.0, 1), speaker()
       // Automatically mono
 {
@@ -24,7 +25,7 @@ ClickTrackMaster::ClickTrackMaster()
     master_adder.set_input_channel(drum_machine.get_output_channel(), 1);
 
     reverb.set_input_channel(master_adder.get_output_channel());
-    speaker.set_input_channel(master_adder.get_output_channel());
+    speaker.set_input_channel(reverb.get_output_channel());
 
     // Register this as the callback for speakers
     speaker.register_callback(ClickTrackMaster::timing_callback, this);
@@ -61,6 +62,9 @@ void ClickTrackMaster::play()
     // If we are already playing in another thread, don't start another loop.
     if(state == PLAYING) 
         return;
+
+    // Handle thread priority
+    setpriority(PRIO_PROCESS, 0, -19);
 
     // If we are stopping, wait for it to finish before starting again
     while(state == PAUSING)

@@ -42,10 +42,9 @@ AudioGenerator::AudioGenerator(unsigned in_num_output_channels)
     : next_out_t(0), output_channels(), output_frame()
 {
     for(unsigned i = 0; i < in_num_output_channels; i++)
-    {
         output_channels.push_back(Channel(*this));
-        output_frame.push_back(0.0);
-    }
+    for(unsigned t = 0; t < BUFFER_SIZE; t++)
+        output_frame.push_back(std::vector<SAMPLE>(in_num_output_channels));
 }
 
 
@@ -67,13 +66,14 @@ void AudioGenerator::generate()
 {
     for(unsigned t=0; t < BUFFER_SIZE; t++)
     {
-        generate_outputs(output_frame, next_out_t);
+        generate_outputs(output_frame[t], next_out_t);
         next_out_t++;
-
-        //Write the outputs into the channel
-        for(int i = 0; i < output_channels.size(); i++)
-            output_channels[i].push_sample(output_frame[i]);
     }
+
+    //Write the outputs into the channel
+    for(int i = 0; i < output_channels.size(); i++)
+    for(unsigned t=0; t < BUFFER_SIZE; t++)
+            output_channels[i].push_sample(output_frame[t][i]);
 }
 
 
@@ -88,8 +88,8 @@ unsigned long AudioGenerator::get_next_time()
 AudioConsumer::AudioConsumer(unsigned in_num_input_channels)
     : next_in_t(0), input_channels(in_num_input_channels, NULL), input_frame()
 {
-    for(unsigned i = 0; i < in_num_input_channels; i++)
-        input_frame.push_back(0.0);
+    for(unsigned i = 0; i < BUFFER_SIZE; i++)
+        input_frame.push_back(std::vector<SAMPLE>(in_num_input_channels));
 }
 
 
@@ -134,16 +134,19 @@ void AudioConsumer::consume()
             if(input_channels[i] == NULL)
             {
                 //std::cerr << "The requested channel is not connected" << std::endl;
-                input_frame[i] = 0.0;
+                input_frame[t][i] = 0.0;
             }
             else
             {
-                input_frame[i] = input_channels[i]->get_sample(next_in_t);
+                input_frame[t][i] = input_channels[i]->get_sample(next_in_t+t);
             }
         }
+    }
 
+    for(unsigned t=0; t < BUFFER_SIZE; t++)
+    {
         // Process
-        process_inputs(input_frame, next_in_t);
+        process_inputs(input_frame[t], next_in_t);
         next_in_t++;
     }
 }

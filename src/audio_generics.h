@@ -98,7 +98,7 @@ namespace ClickTrack
 
             /* Statically allocated frame for speed
              */
-            std::vector<SAMPLE> output_frame;
+            std::vector< std::vector<SAMPLE> > output_frame;
     };
 
 
@@ -154,7 +154,7 @@ namespace ClickTrack
 
             /* statically allocated frame for speed
              */
-            std::vector<SAMPLE> input_frame;
+            std::vector< std::vector<SAMPLE> > input_frame;
     };
 
 
