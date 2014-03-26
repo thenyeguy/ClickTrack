@@ -95,17 +95,13 @@ AudioConsumer::AudioConsumer(unsigned in_num_input_channels)
 
 void AudioConsumer::set_input_channel(Channel* channel, unsigned channel_i)
 {
-    lock.lock();
     input_channels[channel_i] = channel;
-    lock.unlock();
 }
 
 
 void AudioConsumer::remove_channel(unsigned channel_i)
 {
-    lock.lock();
     input_channels[channel_i] = NULL;
-    lock.unlock();
 }
 
 
@@ -132,7 +128,6 @@ void AudioConsumer::consume()
     for(unsigned t=0; t < BUFFER_SIZE; t++)
     {
         // Read in each channel
-        lock.lock();
         for(unsigned i = 0; i < input_channels.size(); i++)
         {
             // If there is no channel currently, read in silence
@@ -146,7 +141,6 @@ void AudioConsumer::consume()
                 input_frame[i] = input_channels[i]->get_sample(next_in_t);
             }
         }
-        lock.unlock();
 
         // Process
         process_inputs(input_frame, next_in_t);
