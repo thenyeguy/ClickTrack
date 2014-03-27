@@ -1,21 +1,20 @@
 #include <iostream>
 #include "audio_generics.h"
+#include "logcat.h"
 
 
 using namespace ClickTrack;
 
 
 Channel::Channel(AudioGenerator& in_parent, unsigned long in_start_t)
-    : parent(in_parent), out(DEFAULT_RINGBUFFER_SIZE)
-{
-    out.set_new_startpoint(in_start_t);
-}
+    : parent(in_parent), buffer(BUFFER_SIZE), next_t(0)
+{}
 
 
 SAMPLE Channel::get_sample(unsigned long t)
 {
     // If this block already fell out of the buffer, just return silence
-    if(out.get_lowest_timestamp() > t)
+    if(next_t > t+BUFFER_SIZE)
     {
         std::cerr << "Channel has requested a time older than is in "
             << "its buffer." << std::endl;
@@ -23,16 +22,17 @@ SAMPLE Channel::get_sample(unsigned long t)
     }
 
     // Otherwise generate enough audio
-    while(out.get_highest_timestamp() <= t)
+    while(next_t <= t)
         parent.generate();
 
-    return out[t];
+    return buffer[t%BUFFER_SIZE];
 }
 
 
 void Channel::push_sample(SAMPLE s)
 {
-    out.add(s);
+    buffer[next_t%BUFFER_SIZE] = s;
+    next_t ++;
 }
 
 
@@ -71,8 +71,8 @@ void AudioGenerator::generate()
     }
 
     //Write the outputs into the channel
-    for(int i = 0; i < output_channels.size(); i++)
-    for(unsigned t=0; t < BUFFER_SIZE; t++)
+    for(int t = 0; t < BUFFER_SIZE; t++)
+        for(int i = 0; i < output_channels.size(); i++)
             output_channels[i].push_sample(output_frame[t][i]);
 }
 

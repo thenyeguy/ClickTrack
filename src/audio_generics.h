@@ -47,7 +47,8 @@ namespace ClickTrack
             /* Internal state
              */
             AudioGenerator& parent;
-            RingBuffer<SAMPLE> out;
+            std::vector<SAMPLE> buffer;
+            unsigned long next_t;
     };
 
 
