@@ -1,3 +1,6 @@
+#ifndef MASTERBINDINGS_H
+#define MASTERBINDINGS_H
+
 #include <chrono>
 #include <jni.h>
 #include "../src/basic_elements.h"
@@ -189,3 +192,5 @@ extern "C"
     JNIEXPORT void JNICALL DRUMMACHINE(setVoice)(JNIEnv* jenv, jobject jobj,
             jstring path);
 }
+
+#endif

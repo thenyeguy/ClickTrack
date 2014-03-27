@@ -1,3 +1,6 @@
+#ifndef LOGCAT_H
+#define LOGCAT_H
+
 #include <android/log.h>
 
 /* Define the tag that our log will be labeled with
@@ -11,3 +14,5 @@
 #define logi(...) __android_log_print(ANDROID_LOG_INFO, CLICKTRACK_LOG_TAG, __VA_ARGS__);
 #define logw(...) __android_log_print(ANDROID_LOG_WARN, CLICKTRACK_LOG_TAG, __VA_ARGS__);
 #define loge(...) __android_log_print(ANDROID_LOG_ERROR, CLICKTRACK_LOG_TAG, __VA_ARGS__);
+
+#endif
