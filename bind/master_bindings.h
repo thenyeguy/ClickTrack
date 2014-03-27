@@ -169,18 +169,6 @@ extern "C"
     JNIEXPORT void JNICALL SUBSYNTH(setReleaseTime)(JNIEnv* jenv, jobject jobj,
             jfloat release_time);
 
-    /* Equalizer. Filter mode is a set of integer constants in Java
-    */
-    JNIEXPORT void JNICALL SUBSYNTH(setPoint1)(JNIEnv* jenv, jobject jobj,
-            jint mode, jfloat cutoff, jfloat gain);
-    JNIEXPORT void JNICALL SUBSYNTH(setPoint4)(JNIEnv* jenv, jobject jobj,
-            jint mode, jfloat cutoff, jfloat gain);
-
-    JNIEXPORT void JNICALL SUBSYNTH(setPoint2)(JNIEnv* jenv, jobject jobj,
-            jfloat cutoff, jfloat Q, jfloat gain);
-    JNIEXPORT void JNICALL SUBSYNTH(setPoint3)(JNIEnv* jenv, jobject jobj,
-            jfloat cutoff, jfloat Q, jfloat gain);
-
     /* Final output gain
     */
     JNIEXPORT void JNICALL SUBSYNTH(setGain)(JNIEnv* jenv, jobject jobj,

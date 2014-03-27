@@ -233,40 +233,6 @@ void SUBSYNTH(setReleaseTime)(JNIEnv* jenv, jobject jobj, jfloat
 }
 
 
-void SUBSYNTH(setPoint1)( JNIEnv* jenv, jobject jobj, jint mode, jfloat cutoff,
-        jfloat gain)
-{
-    ClickTrackMaster& master = ClickTrackMaster::get_instance();
-    master.sub_synth.eq.setPoint1((FourPointEqualizer::EQFilterMode) mode,
-            cutoff, gain);
-}
-
-
-void SUBSYNTH(setPoint4)( JNIEnv* jenv, jobject jobj, jint mode, jfloat cutoff,
-        jfloat gain)
-{
-    ClickTrackMaster& master = ClickTrackMaster::get_instance();
-    master.sub_synth.eq.setPoint4((FourPointEqualizer::EQFilterMode) mode,
-            cutoff, gain);
-}
-
-
-void SUBSYNTH(setPoint2)( JNIEnv* jenv, jobject jobj, jfloat cutoff, jfloat Q,
-        jfloat gain)
-{
-    ClickTrackMaster& master = ClickTrackMaster::get_instance();
-    master.sub_synth.eq.setPoint2(cutoff, Q, gain);
-}
-
-
-void SUBSYNTH(setPoint3)( JNIEnv* jenv, jobject jobj, jfloat cutoff, jfloat Q,
-        jfloat gain)
-{
-    ClickTrackMaster& master = ClickTrackMaster::get_instance();
-    master.sub_synth.eq.setPoint3(cutoff, Q, gain);
-}
-
-
 void SUBSYNTH(setGain)(JNIEnv* jenv, jobject jobj, 
         jfloat gain)
 {
