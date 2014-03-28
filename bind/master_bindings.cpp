@@ -192,14 +192,28 @@ void SUBSYNTH(noteUp)(JNIEnv* jenv, jobject jobj,
 void SUBSYNTH(setOsc1Mode)(JNIEnv* jenv, jobject jobj, jint mode)
 {
     ClickTrackMaster& master = ClickTrackMaster::get_instance();
-    master.sub_synth.set_osc1_mode((Oscillator::OscMode) mode);
+    master.sub_synth.set_osc1_mode((Oscillator::Mode) mode);
 }
 
 
 void SUBSYNTH(setOsc2Mode)(JNIEnv* jenv, jobject jobj, jint mode)
 {
     ClickTrackMaster& master = ClickTrackMaster::get_instance();
-    master.sub_synth.set_osc2_mode((Oscillator::OscMode) mode);
+    master.sub_synth.set_osc2_mode((Oscillator::Mode) mode);
+}
+
+
+void SUBSYNTH(setOsc1Transposition)(JNIEnv* jenv, jobject jobj, jfloat steps)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.sub_synth.set_osc1_transposition(steps);
+}
+
+
+void SUBSYNTH(setOsc2Transposition)(JNIEnv* jenv, jobject jobj, jfloat steps)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.sub_synth.set_osc2_transposition(steps);
 }
 
 
@@ -230,6 +244,34 @@ void SUBSYNTH(setReleaseTime)(JNIEnv* jenv, jobject jobj, jfloat
 {
     ClickTrackMaster& master = ClickTrackMaster::get_instance();
     master.sub_synth.set_release_time(release_time);
+}
+
+
+void SUBSYNTH(setFilterMode)(JNIEnv* jenv, jobject jobj, jint mode)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.sub_synth.filter.set_mode((SecondOrderFilter::Mode) mode);
+}
+
+
+void SUBSYNTH(setFilterCutoff)(JNIEnv* jenv, jobject jobj, jfloat cutoff)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.sub_synth.filter.set_cutoff(cutoff);
+}
+
+
+void SUBSYNTH(setFilterGain)(JNIEnv* jenv, jobject jobj, jfloat gain)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.sub_synth.filter.set_gain(gain);
+}
+
+
+void SUBSYNTH(setFilterQ)(JNIEnv* jenv, jobject jobj, jfloat q)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.sub_synth.filter.set_Q(q);
 }
 
 

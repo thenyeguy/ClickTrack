@@ -161,6 +161,13 @@ extern "C"
     JNIEXPORT void JNICALL SUBSYNTH(setOsc2Mode)(JNIEnv* jenv, jobject jobj,
             jint mode);
 
+    /* Oscillator transpositions. 
+     */
+    JNIEXPORT void JNICALL SUBSYNTH(setOsc1Transposition)(JNIEnv* jenv, 
+            jobject jobj, jfloat steps);
+    JNIEXPORT void JNICALL SUBSYNTH(setOsc2Transposition)(JNIEnv* jenv, 
+            jobject jobj, jfloat steps);
+
     /* ADSR Envelope
     */
     JNIEXPORT void JNICALL SUBSYNTH(setAttackTime)(JNIEnv* jenv, jobject jobj,
@@ -171,6 +178,18 @@ extern "C"
             jfloat sustain_level);
     JNIEXPORT void JNICALL SUBSYNTH(setReleaseTime)(JNIEnv* jenv, jobject jobj,
             jfloat release_time);
+
+    /* Filter controls
+     * Mode will be an integer constant defined in Java to match the enum
+     */
+    JNIEXPORT void JNICALL SUBSYNTH(setFilterMode)(JNIEnv* jenv, jobject jobj,
+            jint mode);
+    JNIEXPORT void JNICALL SUBSYNTH(setFilterCutoff)(JNIEnv* jenv, jobject jobj,
+            jfloat cutoff);
+    JNIEXPORT void JNICALL SUBSYNTH(setFilterGain)(JNIEnv* jenv, jobject jobj,
+            jfloat gain);
+    JNIEXPORT void JNICALL SUBSYNTH(setFilterQ)(JNIEnv* jenv, jobject jobj,
+            jfloat q);
 
     /* Final output gain
     */
