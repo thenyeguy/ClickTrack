@@ -1,7 +1,8 @@
-#include <iostream>
 #include <cmath>
+#include <iostream>
 #include <random>
 #include "oscillator.h"
+#include "opensles_wrapper.h"
 
 using namespace ClickTrack;
 

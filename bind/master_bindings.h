@@ -3,12 +3,13 @@
 
 #include <chrono>
 #include <jni.h>
-#include "../src/basic_elements.h"
+#include "../src/adder.h"
 #include "../src/drum_machine.h"
-#include "../src/io_elements.h"
+#include "../src/microphone.h"
 #include "../src/opensles_wrapper.h"
 #include "../src/oscillator.h"
 #include "../src/reverb.h"
+#include "../src/speaker.h"
 #include "../src/subtractive_synth.h"
 
 

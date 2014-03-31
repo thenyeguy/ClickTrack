@@ -3,11 +3,8 @@
 
 #include <complex>
 #include <vector>
+#include "opensles_wrapper.h"
 
-
-/* TODO: remove this typedef
- */
-typedef float SAMPLE;
 
 namespace ClickTrack
 {
