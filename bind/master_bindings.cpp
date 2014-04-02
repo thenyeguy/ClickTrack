@@ -275,11 +275,39 @@ void SUBSYNTH(setFilterQ)(JNIEnv* jenv, jobject jobj, jfloat q)
 }
 
 
+void SUBSYNTH(setLfoMode)(JNIEnv* jenv, jobject jobj, jint mode)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.sub_synth.lfo.set_mode((Oscillator::Mode) mode);
+}
+
+
+void SUBSYNTH(setLfoFreq)(JNIEnv* jenv, jobject jobj, jfloat freq)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.sub_synth.lfo.set_freq(freq);
+}
+
+
+void SUBSYNTH(setLfoVibratio)(JNIEnv* jenv, jobject jobj, jfloat steps)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.sub_synth.set_lfo_vibrato(steps);
+}
+
+
+void SUBSYNTH(setLfoTremelo)(JNIEnv* jenv, jobject jobj, jfloat db)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.sub_synth.set_lfo_tremelo(db);
+}
+
+
 void SUBSYNTH(setGain)(JNIEnv* jenv, jobject jobj, 
         jfloat gain)
 {
     ClickTrackMaster& master = ClickTrackMaster::get_instance();
-    master.sub_synth.volume.set_gain(gain);
+    master.sub_synth.set_gain(gain);
 }
 
 

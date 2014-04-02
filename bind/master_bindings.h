@@ -192,6 +192,18 @@ extern "C"
     JNIEXPORT void JNICALL SUBSYNTH(setFilterQ)(JNIEnv* jenv, jobject jobj,
             jfloat q);
 
+    /* LFO settings
+     */
+    JNIEXPORT void JNICALL SUBSYNTH(setLfoMode)(JNIEnv* jenv, jobject jobj,
+            jint mode);
+    JNIEXPORT void JNICALL SUBSYNTH(setLfoFreq)(JNIEnv* jenv, jobject jobj,
+            jfloat freq);
+    JNIEXPORT void JNICALL SUBSYNTH(setLfoVibratio)(JNIEnv* jenv, jobject jobj,
+            jfloat steps);
+    JNIEXPORT void JNICALL SUBSYNTH(setLfoTremelo)(JNIEnv* jenv, jobject jobj,
+            jfloat db);
+
+
     /* Final output gain
     */
     JNIEXPORT void JNICALL SUBSYNTH(setGain)(JNIEnv* jenv, jobject jobj,
