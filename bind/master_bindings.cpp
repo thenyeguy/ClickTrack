@@ -17,7 +17,7 @@ ClickTrackMaster& ClickTrackMaster::get_instance()
 ClickTrackMaster::ClickTrackMaster()
     : state(PAUSED), openSles(OpenSlesWrapper::get_instance()),
       mic(), sub_synth(5), drum_machine(""), master_adder(2), 
-      reverb(MoorerReverb::HALL, 1.0, 1.0, 0.0, 1), speaker()
+      reverb(MoorerReverb::HALL, 1.0, 0.0, 0.0, 1), speaker()
       // Automatically mono
 {
     // Connect the signal chain
