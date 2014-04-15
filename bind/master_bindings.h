@@ -198,7 +198,7 @@ extern "C"
             jint mode);
     JNIEXPORT void JNICALL SUBSYNTH(setLfoFreq)(JNIEnv* jenv, jobject jobj,
             jfloat freq);
-    JNIEXPORT void JNICALL SUBSYNTH(setLfoVibratio)(JNIEnv* jenv, jobject jobj,
+    JNIEXPORT void JNICALL SUBSYNTH(setLfoVibrato)(JNIEnv* jenv, jobject jobj,
             jfloat steps);
     JNIEXPORT void JNICALL SUBSYNTH(setLfoTremelo)(JNIEnv* jenv, jobject jobj,
             jfloat db);

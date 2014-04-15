@@ -289,7 +289,7 @@ void SUBSYNTH(setLfoFreq)(JNIEnv* jenv, jobject jobj, jfloat freq)
 }
 
 
-void SUBSYNTH(setLfoVibratio)(JNIEnv* jenv, jobject jobj, jfloat steps)
+void SUBSYNTH(setLfoVibrato)(JNIEnv* jenv, jobject jobj, jfloat steps)
 {
     ClickTrackMaster& master = ClickTrackMaster::get_instance();
     master.sub_synth.set_lfo_vibrato(steps);
