@@ -15,9 +15,14 @@ ClickTrackMaster& ClickTrackMaster::get_instance()
 
 
 ClickTrackMaster::ClickTrackMaster()
-    : state(PAUSED), openSles(OpenSlesWrapper::get_instance()),
-      mic(), sub_synth(5), drum_machine(""), master_adder(2), 
-      reverb(MoorerReverb::HALL, 1.0, 0.0, 0.0, 1), speaker()
+    : state(PAUSED), 
+      openSles(OpenSlesWrapper::get_instance()),
+      sub_synth(5), 
+      drum_machine(""), 
+      master_adder(2), 
+      reverb(MoorerReverb::HALL, 1.0, 0.0, 0.0, 1), 
+      limiter(-3.0),
+      speaker()
       // Automatically mono
 {
     // Connect the signal chain
@@ -25,7 +30,8 @@ ClickTrackMaster::ClickTrackMaster()
     master_adder.set_input_channel(drum_machine.get_output_channel(), 1);
 
     reverb.set_input_channel(master_adder.get_output_channel());
-    speaker.set_input_channel(reverb.get_output_channel());
+    limiter.set_input_channel(reverb.get_output_channel());
+    speaker.set_input_channel(limiter.get_output_channel());
 
     // Register this as the callback for speakers
     speaker.register_callback(ClickTrackMaster::timing_callback, this);
@@ -166,6 +172,20 @@ void REVERB(setWetness)(JNIEnv* jenv, jobject jobj, jfloat wetness)
 {
     ClickTrackMaster& master = ClickTrackMaster::get_instance();
     master.reverb.set_wetness(wetness);
+}
+
+
+
+
+void LIMITER(setGain)(JNIEnv* jenv, jobject jobj, jfloat gain)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.limiter.set_gain(gain);
+}
+void LIMITER(setThreshold)(JNIEnv* jenv, jobject jobj, jfloat threshold)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.limiter.set_threshold(threshold);
 }
 
 

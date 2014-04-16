@@ -5,9 +5,8 @@
 #include <jni.h>
 #include "../src/adder.h"
 #include "../src/drum_machine.h"
-#include "../src/microphone.h"
+#include "../src/limiter.h"
 #include "../src/opensles_wrapper.h"
-#include "../src/oscillator.h"
 #include "../src/reverb.h"
 #include "../src/speaker.h"
 #include "../src/subtractive_synth.h"
@@ -82,12 +81,12 @@ namespace ClickTrack
              */
             OpenSlesWrapper& openSles;
 
-            Microphone       mic;
             SubtractiveSynth sub_synth;
             DrumMachine      drum_machine;
 
             Adder        master_adder;
             MoorerReverb reverb;
+            Limiter      limiter;
             Speaker      speaker;
 
         protected:
@@ -105,6 +104,7 @@ namespace ClickTrack
  */
 #define MASTER(f) Java_edu_cmu_ece_ece551_clicktrack_NativeClickTrack_##f
 #define REVERB(f) Java_edu_cmu_ece_ece551_clicktrack_NativeClickTrack_00024Reverb_##f
+#define LIMITER(f) Java_edu_cmu_ece_ece551_clicktrack_NativeClickTrack_00024Limiter_##f
 #define SUBSYNTH(f) Java_edu_cmu_ece_ece551_clicktrack_NativeClickTrack_00024SubtractiveSynth_##f
 #define DRUMMACHINE(f) Java_edu_cmu_ece_ece551_clicktrack_NativeClickTrack_00024DrumMachine_##f
 extern "C"
@@ -143,6 +143,13 @@ extern "C"
     JNIEXPORT void JNICALL REVERB(setWetness)(JNIEnv* jenv, jobject jobj,
             jfloat wetness);
 
+/*
+ * MASTER CHANNEL LIMITER
+ */
+    JNIEXPORT void JNICALL LIMITER(setGain)(JNIEnv* jenv, jobject jobj,
+            jfloat gain);
+    JNIEXPORT void JNICALL LIMITER(setThreshold)(JNIEnv* jenv, jobject jobj,
+            jfloat threshold);
 
 /* 
  * SUBTRACTIVE SYNTH FEATURES
