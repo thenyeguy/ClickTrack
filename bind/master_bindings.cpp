@@ -17,9 +17,10 @@ ClickTrackMaster& ClickTrackMaster::get_instance()
 ClickTrackMaster::ClickTrackMaster()
     : state(PAUSED), 
       openSles(OpenSlesWrapper::get_instance()),
-      sub_synth(5), 
+      sub_synth(4), 
+      fm_synth(2), 
       drum_machine(""), 
-      master_adder(2), 
+      master_adder(3), 
       reverb(MoorerReverb::HALL, 1.0, 0.0, 0.0, 1), 
       limiter(-3.0),
       speaker()
@@ -27,7 +28,8 @@ ClickTrackMaster::ClickTrackMaster()
 {
     // Connect the signal chain
     master_adder.set_input_channel(sub_synth.get_output_channel(), 0);
-    master_adder.set_input_channel(drum_machine.get_output_channel(), 1);
+    master_adder.set_input_channel(fm_synth.get_output_channel(), 1);
+    master_adder.set_input_channel(drum_machine.get_output_channel(), 2);
 
     reverb.set_input_channel(master_adder.get_output_channel());
     limiter.set_input_channel(reverb.get_output_channel());
@@ -35,12 +37,6 @@ ClickTrackMaster::ClickTrackMaster()
 
     // Register this as the callback for speakers
     speaker.register_callback(ClickTrackMaster::timing_callback, this);
-}
-
-
-ClickTrackMaster::~ClickTrackMaster()
-{
-    //Currently no work to do
 }
 
 
@@ -329,6 +325,157 @@ void SUBSYNTH(setGain)(JNIEnv* jenv, jobject jobj,
     ClickTrackMaster& master = ClickTrackMaster::get_instance();
     master.sub_synth.set_gain(gain);
 }
+
+
+
+
+void FMSYNTH(noteDown)(JNIEnv* jenv, jobject jobj, 
+        jint note, jfloat velocity)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    unsigned long time = master.get_timestamp();
+    master.fm_synth.on_note_down(note, velocity, time);
+}
+
+
+void FMSYNTH(noteUp)(JNIEnv* jenv, jobject jobj, 
+        jint note, jfloat velocity)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    unsigned long time = master.get_timestamp();
+    master.fm_synth.on_note_up(note, velocity, time);
+}
+
+
+void FMSYNTH(setCarrierMode)(JNIEnv* jenv, jobject jobj, jint mode)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.fm_synth.set_carrier_mode((Oscillator::Mode) mode);
+}
+
+
+void FMSYNTH(setModulatorMode)(JNIEnv* jenv, jobject jobj, jint mode)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.fm_synth.set_modulator_mode((Oscillator::Mode) mode);
+}
+
+
+void FMSYNTH(setCarrierTransposition)(JNIEnv* jenv, jobject jobj, jfloat steps)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.fm_synth.set_carrier_transposition(steps);
+}
+
+
+void FMSYNTH(setModulatorTransposition)(JNIEnv* jenv, jobject jobj, jfloat steps)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.fm_synth.set_modulator_transposition(steps);
+}
+
+
+void FMSYNTH(setModulatorIntensity)(JNIEnv* jenv, jobject jobj, jfloat intensity)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.fm_synth.set_modulator_intensity(intensity);
+}
+
+
+void FMSYNTH(setAttackTime)(JNIEnv* jenv, jobject jobj, jfloat attack_time)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.fm_synth.set_attack_time(attack_time);
+}
+
+
+void FMSYNTH(setDecayTime)(JNIEnv* jenv, jobject jobj, jfloat decay_time)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.fm_synth.set_decay_time(decay_time);
+}
+
+
+void FMSYNTH(setSustainLevel)(JNIEnv* jenv, jobject jobj, jfloat
+        sustain_level)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.fm_synth.set_sustain_level(sustain_level);
+}
+
+
+void FMSYNTH(setReleaseTime)(JNIEnv* jenv, jobject jobj, jfloat
+        release_time)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.fm_synth.set_release_time(release_time);
+}
+
+
+void FMSYNTH(setFilterMode)(JNIEnv* jenv, jobject jobj, jint mode)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.fm_synth.filter.set_mode((SecondOrderFilter::Mode) mode);
+}
+
+
+void FMSYNTH(setFilterCutoff)(JNIEnv* jenv, jobject jobj, jfloat cutoff)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.fm_synth.filter.set_cutoff(cutoff);
+}
+
+
+void FMSYNTH(setFilterGain)(JNIEnv* jenv, jobject jobj, jfloat gain)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.fm_synth.filter.set_gain(gain);
+}
+
+
+void FMSYNTH(setFilterQ)(JNIEnv* jenv, jobject jobj, jfloat q)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.fm_synth.filter.set_Q(q);
+}
+
+
+void FMSYNTH(setLfoMode)(JNIEnv* jenv, jobject jobj, jint mode)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.fm_synth.lfo.set_mode((Oscillator::Mode) mode);
+}
+
+
+void FMSYNTH(setLfoFreq)(JNIEnv* jenv, jobject jobj, jfloat freq)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.fm_synth.lfo.set_freq(freq);
+}
+
+
+void FMSYNTH(setLfoVibrato)(JNIEnv* jenv, jobject jobj, jfloat steps)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.fm_synth.set_lfo_vibrato(steps);
+}
+
+
+void FMSYNTH(setLfoTremelo)(JNIEnv* jenv, jobject jobj, jfloat db)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.fm_synth.set_lfo_tremelo(db);
+}
+
+
+void FMSYNTH(setGain)(JNIEnv* jenv, jobject jobj, 
+        jfloat gain)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.fm_synth.set_gain(gain);
+}
+
+
 
 
 void DRUMMACHINE(noteDown)(JNIEnv* jenv, jobject jobj, jint note, 

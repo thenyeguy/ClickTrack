@@ -5,6 +5,7 @@
 #include <jni.h>
 #include "../src/adder.h"
 #include "../src/drum_machine.h"
+#include "../src/fm_synth.h"
 #include "../src/limiter.h"
 #include "../src/opensles_wrapper.h"
 #include "../src/reverb.h"
@@ -82,6 +83,7 @@ namespace ClickTrack
             OpenSlesWrapper& openSles;
 
             SubtractiveSynth sub_synth;
+            FMSynth          fm_synth;
             DrumMachine      drum_machine;
 
             Adder        master_adder;
@@ -94,7 +96,6 @@ namespace ClickTrack
              * to enforce singleton
              */
             ClickTrackMaster();
-            ~ClickTrackMaster();
     };
 }
 
@@ -106,6 +107,7 @@ namespace ClickTrack
 #define REVERB(f) Java_edu_cmu_ece_ece551_clicktrack_NativeClickTrack_00024Reverb_##f
 #define LIMITER(f) Java_edu_cmu_ece_ece551_clicktrack_NativeClickTrack_00024Limiter_##f
 #define SUBSYNTH(f) Java_edu_cmu_ece_ece551_clicktrack_NativeClickTrack_00024SubtractiveSynth_##f
+#define FMSYNTH(f) Java_edu_cmu_ece_ece551_clicktrack_NativeClickTrack_00024FMSynth_##f
 #define DRUMMACHINE(f) Java_edu_cmu_ece_ece551_clicktrack_NativeClickTrack_00024DrumMachine_##f
 extern "C"
 {
@@ -214,6 +216,75 @@ extern "C"
     /* Final output gain
     */
     JNIEXPORT void JNICALL SUBSYNTH(setGain)(JNIEnv* jenv, jobject jobj,
+            jfloat gain);
+
+/* 
+   wFM
+ */
+    /* First set note events
+    */
+    JNIEXPORT void JNICALL FMSYNTH(noteDown)(JNIEnv* jenv, jobject jobj,
+            jint note, jfloat velocity);
+    JNIEXPORT void JNICALL FMSYNTH(noteUp)(JNIEnv* jenv, jobject jobj,
+            jint note, jfloat velocity);
+
+    /* Oscillator modes. 
+     * Mode will be an integer constant defined in Java to match the enum
+     */
+    JNIEXPORT void JNICALL FMSYNTH(setCarrierMode)(JNIEnv* jenv, jobject jobj,
+            jint mode);
+    JNIEXPORT void JNICALL FMSYNTH(setModulatorMode)(JNIEnv* jenv, jobject jobj,
+            jint mode);
+
+    /* Oscillator transpositions. 
+     */
+    JNIEXPORT void JNICALL FMSYNTH(setCarrierTransposition)(JNIEnv* jenv, 
+            jobject jobj, jfloat steps);
+    JNIEXPORT void JNICALL FMSYNTH(setModulatorTransposition)(JNIEnv* jenv, 
+            jobject jobj, jfloat steps);
+
+    /* Modulation
+     */
+    JNIEXPORT void JNICALL FMSYNTH(setModulatorIntensity)(JNIEnv* jenv, 
+            jobject jobj, jfloat intensity);
+
+    /* ADSR Envelope
+    */
+    JNIEXPORT void JNICALL FMSYNTH(setAttackTime)(JNIEnv* jenv, jobject jobj,
+            jfloat attack_time);
+    JNIEXPORT void JNICALL FMSYNTH(setDecayTime)(JNIEnv* jenv, jobject jobj,
+            jfloat decay_time);
+    JNIEXPORT void JNICALL FMSYNTH(setSustainLevel)(JNIEnv* jenv, jobject jobj,
+            jfloat sustain_level);
+    JNIEXPORT void JNICALL FMSYNTH(setReleaseTime)(JNIEnv* jenv, jobject jobj,
+            jfloat release_time);
+
+    /* Filter controls
+     * Mode will be an integer constant defined in Java to match the enum
+     */
+    JNIEXPORT void JNICALL FMSYNTH(setFilterMode)(JNIEnv* jenv, jobject jobj,
+            jint mode);
+    JNIEXPORT void JNICALL FMSYNTH(setFilterCutoff)(JNIEnv* jenv, jobject jobj,
+            jfloat cutoff);
+    JNIEXPORT void JNICALL FMSYNTH(setFilterGain)(JNIEnv* jenv, jobject jobj,
+            jfloat gain);
+    JNIEXPORT void JNICALL FMSYNTH(setFilterQ)(JNIEnv* jenv, jobject jobj,
+            jfloat q);
+
+    /* LFO settings
+     */
+    JNIEXPORT void JNICALL FMSYNTH(setLfoMode)(JNIEnv* jenv, jobject jobj,
+            jint mode);
+    JNIEXPORT void JNICALL FMSYNTH(setLfoFreq)(JNIEnv* jenv, jobject jobj,
+            jfloat freq);
+    JNIEXPORT void JNICALL FMSYNTH(setLfoVibrato)(JNIEnv* jenv, jobject jobj,
+            jfloat steps);
+    JNIEXPORT void JNICALL FMSYNTH(setLfoTremelo)(JNIEnv* jenv, jobject jobj,
+            jfloat db);
+
+    /* Final output gain
+    */
+    JNIEXPORT void JNICALL FMSYNTH(setGain)(JNIEnv* jenv, jobject jobj,
             jfloat gain);
 
 /* 
