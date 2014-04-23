@@ -19,7 +19,7 @@ all: targets tests
 full: clean all
 
 # List of output targets
-targets: subtractive_synth drum_machine
+targets: subtractive_synth fm_synth drum_machine
 tests: test_ringbuffer test_fft test_filterchain test_wav test_convolve \
        test_reverb test_filters test_oscillators test_dynamic_processors
 
@@ -30,6 +30,10 @@ ALL_OBJ = $(addprefix $(OBJDIR)/, $(notdir $(ALL_SRC:.cpp=.o)))
 
 # Define main targets
 subtractive_synth: $(ALL_OBJ) $(OBJDIR)/subtractive_synth_main.o | $(BINDIR)
+	@echo "Linking $(BINDIR)/$@...\n"
+	@$(CC) $(CFLAGS) $(LIBS) $^ -o $(BINDIR)/$@
+
+fm_synth: $(ALL_OBJ) $(OBJDIR)/fm_synth_main.o | $(BINDIR)
 	@echo "Linking $(BINDIR)/$@...\n"
 	@$(CC) $(CFLAGS) $(LIBS) $^ -o $(BINDIR)/$@
 

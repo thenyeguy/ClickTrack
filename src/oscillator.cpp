@@ -7,9 +7,18 @@
 using namespace ClickTrack;
 
 Oscillator::Oscillator(Mode in_mode, float in_freq)
-    : AudioGenerator(1), last_output(0.0), scheduler(*this), lfo(nullptr),
-      lfo_intensity(0.0), phase(0.0), phase_inc(in_freq * 2*M_PI/SAMPLE_RATE), 
-      transpose(1.0), mode(in_mode), freq(in_freq)
+    : AudioGenerator(1), 
+      last_output(0.0), 
+      scheduler(*this), 
+      lfo(nullptr),
+      lfo_intensity(0.0),
+      modulator(nullptr),
+      mod_intensity(0.0),
+      master_phase(0.0),
+      phase_inc(in_freq * 2*M_PI/SAMPLE_RATE), 
+      transpose(1.0),
+      mode(in_mode),
+      freq(in_freq)
 {}
 
 
@@ -49,6 +58,18 @@ void Oscillator::set_lfo_intensity(float steps)
 }
 
 
+void Oscillator::set_modulator_input(Channel* input)
+{
+    modulator = input;
+}
+
+
+void Oscillator::set_modulator_intensity(float intensity)
+{
+    mod_intensity = intensity;
+}
+
+
 void Oscillator::set_freq_callback(Oscillator& caller, void* payload)
 {
     // Get the payload
@@ -74,8 +95,16 @@ void Oscillator::generate_outputs(std::vector<SAMPLE>& outputs, unsigned long t)
         lfo_transpose = pow(2, lfo->get_sample(t) * lfo_intensity);
 
     // Update the phase
-    phase += phase_inc * transpose * lfo_transpose;
-    if(phase > 2*M_PI) phase -= 2*M_PI;
+    master_phase += phase_inc * transpose * lfo_transpose;
+    if(master_phase > 2*M_PI) master_phase -= 2*M_PI;
+
+    // Get the instantaneous phase
+    float phase = master_phase;
+    if(modulator != nullptr) 
+    {
+        phase += mod_intensity * modulator->get_sample(t);
+        if(phase > 2*M_PI) phase -= 2*M_PI;
+    }
 
     // Generate this output
     SAMPLE out;
