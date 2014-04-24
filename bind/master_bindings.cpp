@@ -21,6 +21,7 @@ ClickTrackMaster::ClickTrackMaster()
       fm_synth(2), 
       drum_machine(""), 
       master_adder(3), 
+      ring_mod(1, 0),
       reverb(MoorerReverb::HALL, 1.0, 0.0, 0.0, 1), 
       limiter(-3.0),
       speaker()
@@ -31,7 +32,8 @@ ClickTrackMaster::ClickTrackMaster()
     master_adder.set_input_channel(fm_synth.get_output_channel(), 1);
     master_adder.set_input_channel(drum_machine.get_output_channel(), 2);
 
-    reverb.set_input_channel(master_adder.get_output_channel());
+    ring_mod.set_input_channel(master_adder.get_output_channel());
+    reverb.set_input_channel(ring_mod.get_output_channel());
     limiter.set_input_channel(reverb.get_output_channel());
     speaker.set_input_channel(limiter.get_output_channel());
 
@@ -149,6 +151,20 @@ void MASTER(stop)(JNIEnv* jenv, jobject jobj)
 {
     ClickTrackMaster& master = ClickTrackMaster::get_instance();
     master.stop();
+}
+
+
+
+
+void RINGMOD(setFreq)(JNIEnv* jenv, jobject jobj, jfloat freq)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.ring_mod.modulator.set_freq(freq);
+}
+void RINGMOD(setWetness)(JNIEnv* jenv, jobject jobj, jfloat wetness)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.ring_mod.set_wetness(wetness);
 }
 
 

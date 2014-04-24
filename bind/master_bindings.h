@@ -9,6 +9,7 @@
 #include "../src/limiter.h"
 #include "../src/opensles_wrapper.h"
 #include "../src/reverb.h"
+#include "../src/ring_modulator.h"
 #include "../src/speaker.h"
 #include "../src/subtractive_synth.h"
 
@@ -86,10 +87,11 @@ namespace ClickTrack
             FMSynth          fm_synth;
             DrumMachine      drum_machine;
 
-            Adder        master_adder;
-            MoorerReverb reverb;
-            Limiter      limiter;
-            Speaker      speaker;
+            Adder         master_adder;
+            RingModulator ring_mod;
+            MoorerReverb  reverb;
+            Limiter       limiter;
+            Speaker       speaker;
 
         protected:
             /* Constructor/destructor handles our entire audio chain. Protected
@@ -104,6 +106,7 @@ namespace ClickTrack
  * reference the singleton class automagically.
  */
 #define MASTER(f) Java_edu_cmu_ece_ece551_clicktrack_NativeClickTrack_##f
+#define RINGMOD(f) Java_edu_cmu_ece_ece551_clicktrack_NativeClickTrack_00024RingModulator_##f
 #define REVERB(f) Java_edu_cmu_ece_ece551_clicktrack_NativeClickTrack_00024Reverb_##f
 #define LIMITER(f) Java_edu_cmu_ece_ece551_clicktrack_NativeClickTrack_00024Limiter_##f
 #define SUBSYNTH(f) Java_edu_cmu_ece_ece551_clicktrack_NativeClickTrack_00024SubtractiveSynth_##f
@@ -133,6 +136,15 @@ extern "C"
     /* This is a wrapper for ClickTrackMaster::pause()
     */
     JNIEXPORT void JNICALL MASTER(pause)(JNIEnv* jenv, jobject jobj);
+
+
+/*
+ * MASTER CHANNEL RING MODULATOR
+ */
+    JNIEXPORT void JNICALL RINGMOD(setFreq)(JNIEnv* jenv, jobject jobj,
+            jfloat freq);
+    JNIEXPORT void JNICALL RINGMOD(setWetness)(JNIEnv* jenv, jobject jobj,
+            jfloat freq);
 
 
 /*
