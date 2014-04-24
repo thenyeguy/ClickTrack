@@ -4,12 +4,14 @@
 #include <chrono>
 #include <jni.h>
 #include "../src/adder.h"
+#include "../src/compressor.h"
 #include "../src/drum_machine.h"
 #include "../src/fm_synth.h"
 #include "../src/limiter.h"
 #include "../src/opensles_wrapper.h"
 #include "../src/reverb.h"
 #include "../src/ring_modulator.h"
+#include "../src/second_order_filter.h"
 #include "../src/speaker.h"
 #include "../src/subtractive_synth.h"
 
@@ -85,10 +87,17 @@ namespace ClickTrack
 
             SubtractiveSynth sub_synth;
             FMSynth          fm_synth;
-            DrumMachine      drum_machine;
+
+            DrumMachine   drum_machine;
+            RingModulator ring_modulator;
+            Compressor    compressor;
 
             Adder         master_adder;
-            RingModulator ring_mod;
+
+            SecondOrderFilter low_filter;
+            SecondOrderFilter mid_filter;
+            SecondOrderFilter high_filter;
+
             MoorerReverb  reverb;
             Limiter       limiter;
             Speaker       speaker;
@@ -106,7 +115,7 @@ namespace ClickTrack
  * reference the singleton class automagically.
  */
 #define MASTER(f) Java_edu_cmu_ece_ece551_clicktrack_NativeClickTrack_##f
-#define RINGMOD(f) Java_edu_cmu_ece_ece551_clicktrack_NativeClickTrack_00024RingModulator_##f
+#define EQ(f) Java_edu_cmu_ece_ece551_clicktrack_NativeClickTrack_00024Equalizer_##f
 #define REVERB(f) Java_edu_cmu_ece_ece551_clicktrack_NativeClickTrack_00024Reverb_##f
 #define LIMITER(f) Java_edu_cmu_ece_ece551_clicktrack_NativeClickTrack_00024Limiter_##f
 #define SUBSYNTH(f) Java_edu_cmu_ece_ece551_clicktrack_NativeClickTrack_00024SubtractiveSynth_##f
@@ -139,12 +148,18 @@ extern "C"
 
 
 /*
- * MASTER CHANNEL RING MODULATOR
+ * MASTER CHANNEL EQ
  */
-    JNIEXPORT void JNICALL RINGMOD(setFreq)(JNIEnv* jenv, jobject jobj,
-            jfloat freq);
-    JNIEXPORT void JNICALL RINGMOD(setWetness)(JNIEnv* jenv, jobject jobj,
-            jfloat freq);
+    JNIEXPORT void JNICALL EQ(setLowCutoff)(JNIEnv* jenv, jobject jobj,
+            jfloat cutoff);
+    JNIEXPORT void JNICALL EQ(setMidCutoff)(JNIEnv* jenv, jobject jobj,
+            jfloat cutoff);
+    JNIEXPORT void JNICALL EQ(setMidGain)(JNIEnv* jenv, jobject jobj,
+            jfloat gain);
+    JNIEXPORT void JNICALL EQ(setMidQ)(JNIEnv* jenv, jobject jobj,
+            jfloat q);
+    JNIEXPORT void JNICALL EQ(setHighCutoff)(JNIEnv* jenv, jobject jobj,
+            jfloat cutoff);
 
 
 /*
@@ -157,6 +172,7 @@ extern "C"
     JNIEXPORT void JNICALL REVERB(setWetness)(JNIEnv* jenv, jobject jobj,
             jfloat wetness);
 
+
 /*
  * MASTER CHANNEL LIMITER
  */
@@ -164,6 +180,7 @@ extern "C"
             jfloat gain);
     JNIEXPORT void JNICALL LIMITER(setThreshold)(JNIEnv* jenv, jobject jobj,
             jfloat threshold);
+
 
 /* 
  * SUBTRACTIVE SYNTH FEATURES
@@ -231,7 +248,7 @@ extern "C"
             jfloat gain);
 
 /* 
-   wFM
+ * FM SYNTH FEATURES
  */
     /* First set note events
     */
@@ -313,6 +330,16 @@ extern "C"
             jfloat gain);
     JNIEXPORT void JNICALL DRUMMACHINE(setVoice)(JNIEnv* jenv, jobject jobj,
             jstring path);
+
+    JNIEXPORT void JNICALL DRUMMACHINE(setRingFreq)(JNIEnv* jenv, jobject jobj,
+            jfloat freq);
+    JNIEXPORT void JNICALL DRUMMACHINE(setRingWetness)(JNIEnv* jenv, jobject jobj,
+            jfloat wetness);
+
+    JNIEXPORT void JNICALL DRUMMACHINE(setCompressionThreshold)(JNIEnv* jenv, 
+            jobject jobj, jfloat threshold);
+    JNIEXPORT void JNICALL DRUMMACHINE(setCompressionRatio)(JNIEnv* jenv, 
+            jobject jobj, jfloat ratio);
 }
 
 #endif

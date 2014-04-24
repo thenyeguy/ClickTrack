@@ -17,23 +17,33 @@ ClickTrackMaster& ClickTrackMaster::get_instance()
 ClickTrackMaster::ClickTrackMaster()
     : state(PAUSED), 
       openSles(OpenSlesWrapper::get_instance()),
-      sub_synth(4), 
-      fm_synth(2), 
+      sub_synth(3), 
+      fm_synth(1), 
       drum_machine(""), 
+      ring_modulator(1, 0),
+      compressor(0.0, 0.0),
       master_adder(3), 
-      ring_mod(1, 0),
+      low_filter(SecondOrderFilter::HIGHPASS, 20),
+      mid_filter(SecondOrderFilter::PEAK, 2000, 0.0, 1.0),
+      high_filter(SecondOrderFilter::LOWPASS, 20000),
       reverb(MoorerReverb::HALL, 1.0, 0.0, 0.0, 1), 
       limiter(-3.0),
       speaker()
       // Automatically mono
 {
     // Connect the signal chain
+    ring_modulator.set_input_channel(drum_machine.get_output_channel());
+    compressor.set_input_channel(ring_modulator.get_output_channel());
+
     master_adder.set_input_channel(sub_synth.get_output_channel(), 0);
     master_adder.set_input_channel(fm_synth.get_output_channel(), 1);
-    master_adder.set_input_channel(drum_machine.get_output_channel(), 2);
+    master_adder.set_input_channel(ring_modulator.get_output_channel(), 2);
 
-    ring_mod.set_input_channel(master_adder.get_output_channel());
-    reverb.set_input_channel(ring_mod.get_output_channel());
+    low_filter.set_input_channel(master_adder.get_output_channel());
+    mid_filter.set_input_channel(low_filter.get_output_channel());
+    high_filter.set_input_channel(mid_filter.get_output_channel());
+
+    reverb.set_input_channel(high_filter.get_output_channel());
     limiter.set_input_channel(reverb.get_output_channel());
     speaker.set_input_channel(limiter.get_output_channel());
 
@@ -155,16 +165,34 @@ void MASTER(stop)(JNIEnv* jenv, jobject jobj)
 
 
 
-
-void RINGMOD(setFreq)(JNIEnv* jenv, jobject jobj, jfloat freq)
+void EQ(setLowCutoff)(JNIEnv* jenv, jobject jobj, jfloat cutoff)
 {
     ClickTrackMaster& master = ClickTrackMaster::get_instance();
-    master.ring_mod.modulator.set_freq(freq);
+    master.low_filter.set_cutoff(cutoff);
 }
-void RINGMOD(setWetness)(JNIEnv* jenv, jobject jobj, jfloat wetness)
+
+void EQ(setMidCutoff)(JNIEnv* jenv, jobject jobj, jfloat cutoff)
 {
     ClickTrackMaster& master = ClickTrackMaster::get_instance();
-    master.ring_mod.set_wetness(wetness);
+    master.mid_filter.set_cutoff(cutoff);
+}
+
+void EQ(setMidGain)(JNIEnv* jenv, jobject jobj, jfloat gain)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.mid_filter.set_gain(gain);
+}
+
+void EQ(setMidQ)(JNIEnv* jenv, jobject jobj, jfloat q)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.mid_filter.set_Q(q);
+}
+
+void EQ(setHighCutoff)(JNIEnv* jenv, jobject jobj, jfloat cutoff)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.high_filter.set_cutoff(cutoff);
 }
 
 
@@ -522,4 +550,34 @@ void DRUMMACHINE(setVoice)(JNIEnv* jenv, jobject jobj, jstring jpath)
 
     // Release the string
     jenv->ReleaseStringUTFChars(jpath,s);
+}
+
+
+void DRUMMACHINE(setRingFreq)(JNIEnv* jenv, jobject jobj, jfloat freq)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.ring_modulator.modulator.set_freq(freq);
+}
+
+
+void DRUMMACHINE(setRingWetness)(JNIEnv* jenv, jobject jobj, jfloat wetness)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.ring_modulator.set_wetness(wetness);
+}
+
+
+void DRUMMACHINE(setCompressionThreshold)(JNIEnv* jenv, jobject jobj, 
+        jfloat threshold)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.compressor.set_threshold(threshold);
+}
+
+
+void DRUMMACHINE(setCompressionRatio)(JNIEnv* jenv, jobject jobj, 
+        jfloat ratio)
+{
+    ClickTrackMaster& master = ClickTrackMaster::get_instance();
+    master.compressor.set_compression_ratio(ratio);
 }
