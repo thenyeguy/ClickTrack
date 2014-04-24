@@ -15,6 +15,12 @@ namespace ClickTrack
         public:
             RingModulator(float freq, float wetness, unsigned num_channels=1);
 
+            /* Changes the wetness mix between input and modulated output
+             */
+            void set_wetness(float wetness);
+
+            /* The input signal is multiplied by the modulator
+             */
             Oscillator modulator;
             
         private:

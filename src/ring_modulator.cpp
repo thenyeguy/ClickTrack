@@ -10,6 +10,12 @@ RingModulator::RingModulator(float freq, float in_wetness, unsigned num_channels
 {}
 
 
+void RingModulator::set_wetness(float in_wetness)
+{
+    wetness = in_wetness;
+}
+
+
 void RingModulator::filter(std::vector<SAMPLE>& input,
         std::vector<SAMPLE>& output, unsigned long t)
 {
