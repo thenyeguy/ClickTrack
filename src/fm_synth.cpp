@@ -116,7 +116,7 @@ void FMSynth::set_lfo_vibrato(float steps)
 }
 
 
-void FMSynth::set_lfo_tremelo(float db)
+void FMSynth::set_lfo_tremolo(float db)
 {
     volume.set_lfo_intensity(db);
 }

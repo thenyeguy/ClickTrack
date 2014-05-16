@@ -113,7 +113,7 @@ void SubtractiveSynth::set_lfo_vibrato(float steps)
 }
 
 
-void SubtractiveSynth::set_lfo_tremelo(float db)
+void SubtractiveSynth::set_lfo_tremolo(float db)
 {
     volume.set_lfo_intensity(db);
 }

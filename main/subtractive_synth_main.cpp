@@ -16,7 +16,7 @@ int main()
 
     inst.filter.set_cutoff(1000);
     inst.set_lfo_vibrato(0.1);
-    inst.set_lfo_tremelo(.2);
+    inst.set_lfo_tremolo(.2);
 
     cout << "Initializing signal chain" << endl;
     Limiter limiter(-3.0);

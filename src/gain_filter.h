@@ -18,9 +18,9 @@ namespace ClickTrack
              */
             void set_gain(float gain);
 
-            /* The LFO modulates the gain parameter by the specified
-             * gain in decibels. Setting the LFO to nullptr will remove any LFO
-             * effect
+            /* The LFO modulates the gain parameter by the specified gain in
+             * decibels, i.e. tremolo. Setting the LFO to nullptr will remove
+             * any LFO effect
              */
             void set_lfo_input(Channel* input);
             void set_lfo_intensity(float db);

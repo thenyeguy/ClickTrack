@@ -59,14 +59,14 @@ namespace ClickTrack
             /* The LFO is connected to the oscillators to generate vibrato, and
              * to the output gain to generate tremolo.
              *
-             * Vibrato is specified in steps, tremelo in decibal variation
+             * Vibrato is specified in steps, tremolo in decibal variation
              */
             Oscillator lfo;
             void set_lfo_vibrato(float steps);
-            void set_lfo_tremelo(float db);
+            void set_lfo_tremolo(float db);
 
         private:
-            /* Output gain for the oscillator. Also performs tremelo
+            /* Output gain for the oscillator. Also performs tremolo
              */
             GainFilter volume;
 
