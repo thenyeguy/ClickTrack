@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include <iostream>
 #include "../src/microphone.h"
-#include "../src/reverb.h"
+#include "../src/moorer_reverb.h"
 #include "../src/speaker.h"
 
 using namespace ClickTrack;
