@@ -180,30 +180,3 @@ void AudioFilter::generate_outputs(std::vector<SAMPLE>& outputs, unsigned long t
 
 void AudioFilter::process_inputs(std::vector<SAMPLE>& inputs, unsigned long t)
 {}
-
-
-
-
-FilterBank::FilterBank(unsigned in_num_output_channels,
-                       unsigned in_num_input_channels)
-    : num_input_channels(in_num_input_channels),
-      num_output_channels(in_num_output_channels),
-      output_channels() {}
-
-
-Channel* FilterBank::get_output_channel(unsigned i)
-{
-    return output_channels[i];
-}
-
-
-const unsigned FilterBank::get_num_output_channels()
-{
-    return num_output_channels;
-}
-
-
-const unsigned FilterBank::get_num_input_channels()
-{
-    return num_input_channels;
-}

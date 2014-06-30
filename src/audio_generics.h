@@ -173,43 +173,6 @@ namespace ClickTrack
     };
 
 
-    /* The FilterBank is a hybrid signal chain element. It both consumes and
-     * generates audio, but does so by internally connecting many filters
-     * together.
-     *
-     * To implement a FilterBank, one must initialize their elements in the
-     * constructor, as well as insert their output channels into the vector.
-     */
-    class FilterBank
-    {
-        public:
-            FilterBank(unsigned num_output_channels,
-                       unsigned num_input_channels);
-            virtual ~FilterBank() {} 
-
-            /* Returns the requested output channel by number
-             */
-            Channel* get_output_channel(unsigned i = 0);
-
-            const unsigned get_num_output_channels();
-            const unsigned get_num_input_channels();
-
-            /* The following functions must be overriden to allow the
-             * setting and removal of IO channels
-             */
-            virtual void set_input_channel(Channel* channel,
-                    unsigned channel_i = 0) = 0;
-            virtual void remove_channel(unsigned channel_i) = 0;
-
-            virtual unsigned get_channel_index(Channel* channel) = 0;
-
-        protected:
-            const unsigned num_input_channels;
-            const unsigned num_output_channels;
-            std::vector<Channel*> output_channels;
-    };
-
-
     /* Exceptions used by the audio generics
      */
     class ChannelOutOfRange: public std::exception

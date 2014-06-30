@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../src/convolution_reverb.h"
+#include "../src/convolution_filter.h"
 #include "../src/speaker.h"
 #include "../src/timing_manager.h"
 #include "../src/wav_reader.h"
@@ -20,9 +20,9 @@ int main()
 
         WavReader in("wav/test.wav");
 
-        ConvolutionReverb revl(imp->num_samples, imp->left, 0.1, 0.5);
+        ConvolutionFilter revl(imp->num_samples, imp->left, 0.1, 0.5);
         revl.set_input_channel(in.get_output_channel(0));
-        ConvolutionReverb revr(imp->num_samples, imp->right, 0.1, 0.5);
+        ConvolutionFilter revr(imp->num_samples, imp->right, 0.1, 0.5);
         revr.set_input_channel(in.get_output_channel(1));
 
 

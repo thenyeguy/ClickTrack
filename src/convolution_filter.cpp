@@ -1,13 +1,17 @@
 #include <iostream>
 #include <complex>
 #include "convolution_filter.h"
+#include "wav_reader.h"
 
 using namespace ClickTrack;
 
 
 ConvolutionFilter::ConvolutionFilter(unsigned impulse_length,
-                                     SAMPLE* in_impulse_response)
+        SAMPLE* in_impulse_response, float in_gain, float in_wetness)
     : AudioFilter(1),
+
+      gain(pow(10, in_gain/10)),
+      wetness(in_wetness),
 
       transform_size(CONVOLUTION_BUFFER_SIZE*2),
       transformer(transform_size),
@@ -87,12 +91,26 @@ ConvolutionFilter::~ConvolutionFilter()
 }
 
 
+void ConvolutionFilter::set_gain(float in_gain)
+{
+    gain = pow(10, in_gain/10);
+}
+
+
+void ConvolutionFilter::set_wetness(float in_wetness)
+{
+    wetness = in_wetness;
+}
+
+
 void ConvolutionFilter::filter(std::vector<SAMPLE>& input,
         std::vector<SAMPLE>& output, unsigned long t)
 {
     // Pull in the output, return the output
     input_buffer[t % CONVOLUTION_BUFFER_SIZE] = input[0];
-    output[0] = output_queue[t % CONVOLUTION_BUFFER_SIZE];
+    output[0] = gain*
+        (wetness*output_queue[t % CONVOLUTION_BUFFER_SIZE] +
+         (1-wetness)*input[0]);
 
     // Call the processing if we have filled the buffer
     // Set start time of this block
@@ -142,4 +160,23 @@ void ConvolutionFilter::process(unsigned long start_t)
     // Update the time buffer
     for(int i=0; i < CONVOLUTION_BUFFER_SIZE; i++)
         reverb_buffer.add(0.0);
+}
+
+
+impulse_pair* ClickTrack::impulse_from_wav(const char* filename)
+{
+    WavReader wav(filename);
+
+    impulse_pair* out = new impulse_pair;
+    out->num_samples = wav.get_total_samples();
+    out->left = new SAMPLE[out->num_samples];
+    out->right = new SAMPLE[out->num_samples];
+
+    for(unsigned t = 0; t < out->num_samples; t++)
+    {
+        out->left[t] = wav.get_output_channel(0)->get_sample(t);
+        out->right[t] = wav.get_output_channel(0)->get_sample(t);
+    }
+
+    return out;
 }

@@ -25,8 +25,12 @@ namespace ClickTrack
     {
         public:
             ConvolutionFilter(unsigned impulse_length,
-                              SAMPLE* in_impulse_response);
+                              SAMPLE* in_impulse_response,
+                              float gain, float wetness);
             ~ConvolutionFilter();
+
+            void set_gain(float in_gain);
+            void set_wetness(float in_wetness);
 
         private:
             // Filter only queues up its input samples, then when that queue is
@@ -34,6 +38,9 @@ namespace ClickTrack
             void filter(std::vector<SAMPLE>& input, 
                     std::vector<SAMPLE>& output, unsigned long t);
             void process(unsigned long start_t);
+
+            float gain;
+            float wetness;
 
             const unsigned transform_size;
             Transformer transformer;
@@ -50,6 +57,18 @@ namespace ClickTrack
             std::complex<SAMPLE>* output_buffer;
             std::vector<SAMPLE> output_queue;
     };
+
+
+    /* Given a wav file, reads that wav file into a pair of arrays. The two
+     * arrays represent the impulse response given in the left and right
+     * channels.
+     */
+    typedef struct {
+        unsigned num_samples;
+        SAMPLE* left;
+        SAMPLE* right;
+    } impulse_pair;
+    impulse_pair* impulse_from_wav(const char* filename);
 }
 
 #endif
