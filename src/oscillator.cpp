@@ -30,9 +30,6 @@ void Oscillator::set_mode(Mode in_mode)
 
 void Oscillator::set_freq(float in_freq, unsigned long time)
 {
-    if(time == 0)
-        time = get_next_time();
-
     // Put the frequency in the payload and schedule the call
     float* payload = new float;
     *payload = in_freq;

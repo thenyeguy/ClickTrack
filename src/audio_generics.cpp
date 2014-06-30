@@ -5,17 +5,15 @@
 using namespace ClickTrack;
 
 
-Channel::Channel(AudioGenerator& in_parent, unsigned long in_start_t)
-    : parent(in_parent), out(DEFAULT_RINGBUFFER_SIZE)
-{
-    out.set_new_startpoint(in_start_t);
-}
+Channel::Channel(AudioGenerator& in_parent, unsigned long start_t)
+    : parent(in_parent), last_sample(0.0), next_time(start_t)
+{}
 
 
 SAMPLE Channel::get_sample(unsigned long t)
 {
     // If this block already fell out of the buffer, just return silence
-    if(out.get_lowest_timestamp() > t)
+    if(next_time > t+1)
     {
         std::cerr << "Channel has requested a time older than is in "
             << "its buffer." << std::endl;
@@ -23,23 +21,24 @@ SAMPLE Channel::get_sample(unsigned long t)
     }
 
     // Otherwise generate enough audio
-    while(out.get_highest_timestamp() <= t)
-        parent.generate();
+    while(next_time <= t)
+        parent.tick(next_time);
 
-    return out[t];
+    return last_sample; 
 }
 
 
 void Channel::push_sample(SAMPLE s)
 {
-    out.add(s);
+    last_sample = s;
+    next_time++;
 }
 
 
 
 
 AudioGenerator::AudioGenerator(unsigned in_num_output_channels)
-    : next_out_t(0), output_channels(), output_frame()
+    : output_channels(), output_frame()
 {
     for(unsigned i = 0; i < in_num_output_channels; i++)
     {
@@ -63,27 +62,20 @@ Channel* AudioGenerator::get_output_channel(unsigned i)
 }
 
 
-void AudioGenerator::generate()
+void AudioGenerator::tick(unsigned long t)
 {
-    generate_outputs(output_frame, next_out_t);
-    next_out_t++;
+    generate_outputs(output_frame, t);
 
     //Write the outputs into the channel
-    for(int i = 0; i < output_channels.size(); i++)
+    for(unsigned i = 0; i < output_channels.size(); i++)
         output_channels[i].push_sample(output_frame[i]);
-}
-
-
-unsigned long AudioGenerator::get_next_time()
-{
-    return next_out_t;
 }
 
 
 
 
 AudioConsumer::AudioConsumer(unsigned in_num_input_channels)
-    : next_in_t(0), input_channels(in_num_input_channels, NULL), input_frame()
+    : input_channels(in_num_input_channels, NULL), input_frame()
 {
     for(unsigned i = 0; i < in_num_input_channels; i++)
         input_frame.push_back(0.0);
@@ -120,7 +112,7 @@ unsigned AudioConsumer::get_num_input_channels()
 }
 
 
-void AudioConsumer::consume()
+void AudioConsumer::tick(unsigned long t)
 {
     // Read in each channel
     for(unsigned i = 0; i < input_channels.size(); i++)
@@ -133,19 +125,12 @@ void AudioConsumer::consume()
         }
         else
         {
-            input_frame[i] = input_channels[i]->get_sample(next_in_t);
+            input_frame[i] = input_channels[i]->get_sample(t);
         }
     }
 
     // Process
-    process_inputs(input_frame, next_in_t);
-    next_in_t++;
-}
-
-
-unsigned long AudioConsumer::get_next_time()
-{
-    return next_in_t;
+    process_inputs(input_frame, t);
 }
 
 
@@ -163,20 +148,38 @@ AudioFilter::AudioFilter(unsigned in_num_input_channels,
 }
 
 
-void AudioFilter::generate_outputs(std::vector<SAMPLE>& outputs, unsigned long t)
+void AudioFilter::tick(unsigned long t)
 {
-    consume();
-    
-    // Copy our outputs to the final output buffer
-    for(unsigned i = 0; i <= outputs.size(); i++)
-        outputs[i] = output_frame[i];
+    // Read in each channel
+    for(unsigned i = 0; i < input_channels.size(); i++)
+    {
+        // If there is no channel currently, read in silence
+        if(input_channels[i] == NULL)
+        {
+            //std::cerr << "The requested channel is not connected" << std::endl;
+            input_frame[i] = 0.0;
+        }
+        else
+        {
+            input_frame[i] = input_channels[i]->get_sample(t);
+        }
+    }
+
+    // Process
+    filter(input_frame, output_frame, t);
+
+    //Write the outputs into the channel
+    for(unsigned i = 0; i < output_channels.size(); i++)
+        output_channels[i].push_sample(output_frame[i]);
 }
+
+
+void AudioFilter::generate_outputs(std::vector<SAMPLE>& outputs, unsigned long t)
+{}
 
 
 void AudioFilter::process_inputs(std::vector<SAMPLE>& inputs, unsigned long t)
-{
-    filter(inputs, output_frame, t);
-}
+{}
 
 
 
@@ -188,7 +191,7 @@ FilterBank::FilterBank(unsigned in_num_output_channels,
       output_channels() {}
 
 
-Channel* FilterBank::get_output_channel(int i)
+Channel* FilterBank::get_output_channel(unsigned i)
 {
     return output_channels[i];
 }

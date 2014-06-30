@@ -1,6 +1,7 @@
 #include <iostream>
 #include "../src/convolution_reverb.h"
 #include "../src/speaker.h"
+#include "../src/timing_manager.h"
 #include "../src/wav_reader.h"
 #include "../src/wav_writer.h"
 
@@ -31,12 +32,13 @@ int main()
         speaker.set_input_channel(revl.get_output_channel(),0);
         speaker.set_input_channel(revr.get_output_channel(),1);
 
-        std::cout << "Playing" << std::endl;
+        TimingManager timing;
+        timing.add_consumer(&out);
+        timing.add_consumer(&speaker);
+
+        std::cout << "Entering playback loop..." << std::endl << std::endl;
         while(!in.is_done())
-        {
-            out.consume();
-            speaker.consume();
-        }
+            timing.tick();
         std::cout << "Done" << std::endl;
     }
     catch(std::exception& e)

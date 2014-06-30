@@ -25,7 +25,7 @@ void Speaker::process_inputs(std::vector<SAMPLE>& inputs, unsigned long t)
 
         // Run the callback
         if(callback != NULL)
-            callback(get_next_time()+1, payload);
+            callback(t+1, payload);
     }
 }
 

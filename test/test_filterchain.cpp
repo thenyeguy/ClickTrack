@@ -6,6 +6,7 @@
 #include "../src/microphone.h"
 #include "../src/oscillator.h"
 #include "../src/speaker.h"
+#include "../src/timing_manager.h"
 
 using namespace ClickTrack;
 
@@ -33,7 +34,8 @@ int main()
     speaker.set_input_channel(mic_gain.get_output_channel(), 0);
     speaker.set_input_channel(tri_gain.get_output_channel(), 1);
 
-
+    TimingManager timer;
+    timer.add_consumer(&speaker);
 
 
     std::cout << "Entering process loop" << std::endl;
@@ -41,7 +43,7 @@ int main()
     {
         try
         {
-            speaker.consume();
+            timer.tick();
         }
         catch(std::exception& e)
         {

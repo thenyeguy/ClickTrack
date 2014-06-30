@@ -4,6 +4,7 @@
 #include <vector>
 #include "audio_generics.h"
 #include "fft.h"
+#include "ringbuffer.h"
 
 
 namespace ClickTrack

@@ -2,6 +2,7 @@
 #define MOORER_REVERB_H
 
 #include "audio_generics.h"
+#include "ringbuffer.h"
 
 
 namespace ClickTrack

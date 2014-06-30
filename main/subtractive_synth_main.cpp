@@ -5,6 +5,7 @@
 #include "../src/ring_modulator.h"
 #include "../src/speaker.h"
 #include "../src/subtractive_synth.h"
+#include "../src/timing_manager.h"
 
 int main()
 {
@@ -26,12 +27,13 @@ int main()
     out.set_input_channel(limiter.get_output_channel());
     out.register_callback(MidiListener::timing_callback, &midi);
 
+    TimingManager timing;
+    timing.add_instrument(&inst);
+    timing.add_consumer(&out);
+
     cout << "Entering playback loop..." << endl << endl;
     while(true)
-    {
-        out.consume();
-    }
-
+        timing.tick();
     
     return 0;
 }

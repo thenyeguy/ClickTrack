@@ -3,6 +3,7 @@
 #include "../src/compressor.h"
 #include "../src/limiter.h"
 #include "../src/noise_gate.h"
+#include "../src/timing_manager.h"
 #include "../src/wav_reader.h"
 #include "../src/wav_writer.h"
 
@@ -29,14 +30,17 @@ int main()
     WavWriter noise_gate_wav("wav/test_noise_gate.wav");
     noise_gate_wav.set_input_channel(noise_gate.get_output_channel());
 
+    TimingManager timer;
+    timer.add_consumer(&limiter_wav);
+    timer.add_consumer(&compressor_wav);
+    timer.add_consumer(&noise_gate_wav);
+
     std::cout << "Entering process loop" << std::endl;
     for(unsigned i = 0; i < test_wav.get_total_samples(); i++)
     {
         try
         {
-            limiter_wav.consume();
-            compressor_wav.consume();
-            noise_gate_wav.consume();
+            timer.tick();
         }
         catch(std::exception& e)
         {

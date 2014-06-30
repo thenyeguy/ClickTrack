@@ -1,5 +1,6 @@
 #include <iostream>
 #include "../src/speaker.h"
+#include "../src/timing_manager.h"
 #include "../src/wav_reader.h"
 #include "../src/wav_writer.h"
 
@@ -21,13 +22,14 @@ int main()
         write.set_input_channel(wav.get_output_channel(0),0);
         write.set_input_channel(wav.get_output_channel(1),1);
 
+        TimingManager timer;
+        timer.add_consumer(&speaker);
+        timer.add_consumer(&write);
+
 
         std::cout << "Entering process loop" << std::endl;
         while(!wav.is_done())
-        {
-            speaker.consume();
-            write.consume();
-        }
+            timer.tick();
         std::cout << "Exiting" << "\n" << std::endl;
     }
     catch(std::exception& e)

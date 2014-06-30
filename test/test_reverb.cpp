@@ -3,6 +3,7 @@
 #include "../src/microphone.h"
 #include "../src/moorer_reverb.h"
 #include "../src/speaker.h"
+#include "../src/timing_manager.h"
 
 using namespace ClickTrack;
 
@@ -20,10 +21,13 @@ int main()
         Speaker out;
         out.set_input_channel(rev.get_output_channel());
 
+        TimingManager timer;
+        timer.add_consumer(&out);
+
 
         std::cout << "Playing" << std::endl;
         while(true)
-            out.consume();
+            timer.tick();
 
         std::cout << "Done" << std::endl;
     }

@@ -3,6 +3,7 @@
 #include "../src/first_order_filter.h"
 #include "../src/oscillator.h"
 #include "../src/second_order_filter.h"
+#include "../src/timing_manager.h"
 #include "../src/wav_reader.h"
 #include "../src/wav_writer.h"
 
@@ -23,13 +24,16 @@ int main()
     WavWriter wav("wav/test_filters.wav");
     wav.set_input_channel(filter2.get_output_channel());
 
+    TimingManager timer;
+    timer.add_consumer(&wav);
+
 
     std::cout << "Entering process loop" << std::endl;
     for(unsigned i = 0; i < 44100; i++)
     {
         try
         {
-            wav.consume();
+            timer.tick();
         }
         catch(std::exception& e)
         {

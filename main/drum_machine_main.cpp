@@ -2,6 +2,7 @@
 #include "../src/drum_machine.h"
 #include "../src/speaker.h"
 #include "../src/midi_wrapper.h"
+#include "../src/timing_manager.h"
 
 using namespace ClickTrack;
 
@@ -21,11 +22,13 @@ int main()
     out.set_input_channel(clip.get_output_channel());
     out.register_callback(MidiListener::timing_callback, &midi);
 
+    TimingManager timing;
+    timing.add_instrument(&drum);
+    timing.add_consumer(&out);
+
     cout << "Entering playback loop..." << endl << endl;
     while(true)
-    {
-        out.consume();
-    }
+        timing.tick();
 
     return 0;
 }

@@ -3,7 +3,6 @@
 
 #include <vector>
 #include "portaudio_wrapper.h"
-#include "ringbuffer.h"
 
 
 namespace ClickTrack
@@ -40,14 +39,13 @@ namespace ClickTrack
              */
             Channel(AudioGenerator& in_parent, unsigned long start_t=0);
 
-            /* Adds a sample to this Channel's internal buffer 
-             */
             void push_sample(SAMPLE s);
 
             /* Internal state
              */
             AudioGenerator& parent;
-            RingBuffer<SAMPLE> out;
+            SAMPLE last_sample;
+            unsigned long next_time;
     };
 
 
@@ -78,26 +76,14 @@ namespace ClickTrack
             virtual void generate_outputs(std::vector<SAMPLE>& outputs, 
                     unsigned long t) = 0;
 
-            /* Returns the next sample time
-             */
-            unsigned long get_next_time();
-
-        private:
             /* Writes outputs into the buffer. Calls tick to determine what to
              * write out. Used by the output channel
              */
-            void generate();
-
-            /* Starting time of next block
-             */
-            unsigned long next_out_t;
+            virtual void tick(unsigned long t);
 
             /* Information about our internal output channels
              */
             std::vector<Channel> output_channels;
-
-            /* Statically allocated frame for speed
-             */
             std::vector<SAMPLE> output_frame;
     };
 
@@ -113,6 +99,8 @@ namespace ClickTrack
      */
     class AudioConsumer
     {
+        friend class TimingManager;
+
         public:
             AudioConsumer(unsigned num_input_channels = 1);
             virtual ~AudioConsumer() {}
@@ -127,33 +115,21 @@ namespace ClickTrack
 
             unsigned get_channel_index(Channel* channel);
 
+        protected:
             /* When called, reads in the next frame from the input channels
              * and calls the tick function.
              */
-            void consume();
+            virtual void tick(unsigned long t);
 
-        protected:
             /* When called on input data, processes it. Must be overwritten in
              * subclass.
              */
             virtual void process_inputs(std::vector<SAMPLE>& inputs, 
                     unsigned long t) = 0;
 
-            /* Returns the next sample time
-             */
-            unsigned long get_next_time();
-
-        private:
-            /* Starting time of next block
-             */
-            unsigned long next_in_t;
-
             /* Information about our internal input channels
              */
             std::vector<Channel*> input_channels;
-
-            /* statically allocated frame for speed
-             */
             std::vector<SAMPLE> input_frame;
     };
 
@@ -178,13 +154,14 @@ namespace ClickTrack
             virtual void filter(std::vector<SAMPLE>& input, 
                     std::vector<SAMPLE>& output, unsigned long t) = 0;
 
-            /* Gets the next sample time from the consumer
+            /* When called, reads in the next frame from the input channels
+             * and write to the output channels.
              */
-            using AudioConsumer::get_next_time;
+            void tick(unsigned long t);
 
         private:
-            /* Override the tick functions. When requested, use our tick to
-             * generate the next frame of data.
+            /* To properly implement the tick override, these functions must be
+             * defined. They do nothing.
              */
             void generate_outputs(std::vector<SAMPLE>& inputs, unsigned long t);
             void process_inputs(std::vector<SAMPLE>& outputs, unsigned long t);
@@ -212,7 +189,7 @@ namespace ClickTrack
 
             /* Returns the requested output channel by number
              */
-            Channel* get_output_channel(int i = 0);
+            Channel* get_output_channel(unsigned i = 0);
 
             const unsigned get_num_output_channels();
             const unsigned get_num_input_channels();

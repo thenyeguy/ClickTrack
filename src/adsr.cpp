@@ -23,9 +23,6 @@ ADSRFilter::ADSRFilter(float in_attack_time, float in_decay_time,
 
 void ADSRFilter::on_note_down(unsigned long time)
 {
-    if(time == 0)
-        time = get_next_time();
-
     // Run the callback with no payload
     scheduler.schedule(time, ADSRFilter::note_down_callback, (void*)time);
 }
@@ -33,9 +30,6 @@ void ADSRFilter::on_note_down(unsigned long time)
 
 void ADSRFilter::on_note_up(unsigned long time)
 {
-    if(time == 0)
-        time = get_next_time();
-
     // Run the callback with no payload
     scheduler.schedule(time, ADSRFilter::note_up_callback, (void*)time);
 }

@@ -3,6 +3,7 @@
 #include "../src/gain_filter.h"
 #include "../src/oscillator.h"
 #include "../src/speaker.h"
+#include "../src/timing_manager.h"
 #include "../src/wav_writer.h"
 
 using namespace ClickTrack;
@@ -29,6 +30,9 @@ int main()
     Speaker speaker;
     speaker.set_input_channel(gain.get_output_channel());
 
+    TimingManager timer;
+    timer.add_consumer(&speaker);
+
 
     // Loop small number of times to generate enough audio
     std::cout << "Entering process loop" << std::endl;
@@ -36,7 +40,7 @@ int main()
     {
         try
         {
-            speaker.consume();
+            timer.tick();
         }
         catch(std::exception& e)
         {
