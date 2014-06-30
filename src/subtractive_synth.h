@@ -87,9 +87,9 @@ namespace ClickTrack
 
             /* Callbacks for starting and stopping notes
              */
-            void handle_note_down(float velocity, unsigned long time);
-            void handle_note_up(unsigned long time);
-            void handle_pitch_wheel(float value, unsigned long time);
+            void handle_note_down(float velocity);
+            void handle_note_up();
+            void handle_pitch_wheel(float value);
 
         protected:
             /* Define our signal chain

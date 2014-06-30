@@ -8,8 +8,8 @@ using namespace ClickTrack;
 ADSRFilter::ADSRFilter(float in_attack_time, float in_decay_time,
                        float in_sustain_level, float in_release_time,
                        float in_gain, unsigned in_num_channels)
-    : AudioFilter(in_num_channels, in_num_channels), scheduler(*this),
-      state(silent), trigger_time(0), end_time(0), multiplier(0), 
+    : AudioFilter(in_num_channels, in_num_channels),
+      state(silent), state_time(0), state_duration(0), multiplier(0), 
       delta_mult(0)
 {
     attack_time  = in_attack_time  * SAMPLE_RATE;
@@ -21,47 +21,19 @@ ADSRFilter::ADSRFilter(float in_attack_time, float in_decay_time,
 }
 
 
-void ADSRFilter::on_note_down(unsigned long time)
+void ADSRFilter::on_note_down()
 {
-    // Run the callback with no payload
-    scheduler.schedule(time, ADSRFilter::note_down_callback, (void*)time);
+    state = attack;
+    state_time = 0;
+    state_duration = attack_time;
 }
 
 
-void ADSRFilter::on_note_up(unsigned long time)
+void ADSRFilter::on_note_up()
 {
-    // Run the callback with no payload
-    scheduler.schedule(time, ADSRFilter::note_up_callback, (void*)time);
-}
-
-
-void ADSRFilter::note_down_callback(ADSRFilter& caller, void* payload)
-{
-    // Get payload
-    unsigned long t = (unsigned long) payload;
-
-    // Set the state
-    caller.state = attack;
-    caller.trigger_time = t;
-    caller.end_time = t + caller.attack_time;
-    
-    // Recalculate the multiplier delta
-    caller.delta_mult = (1.0 - caller.multiplier)/caller.attack_time;
-}
-
-
-void ADSRFilter::note_up_callback(ADSRFilter& caller, void* payload)
-{
-    // Get payload
-    unsigned long t = (unsigned long) payload;
-
-    // Set the state
-    caller.state = release;
-    caller.trigger_time = t;
-    caller.end_time = t + caller.release_time;
-
-    // Recalculate the multiplier delta
-    caller.delta_mult = (0.0 - caller.multiplier)/caller.release_time;
+    state = release;
+    state_time = 0;
+    state_duration = release_time;
 }
 
 
@@ -98,21 +70,19 @@ void ADSRFilter::set_gain(float in_gain)
 void ADSRFilter::filter(std::vector<SAMPLE>& input, std::vector<SAMPLE>& output,
         unsigned long t)
 {
-    // Run the scheduler
-    scheduler.run(t);
-
     // Update the multiplier
     multiplier += delta_mult;
 
     // Update the state if nessecary
-    if(t >= end_time)
+    state_time++;
+    if(state_time > state_duration)
     {
         switch(state)
         {
             case attack:
                 state = decay;
-                trigger_time = t;
-                end_time = t + decay_time;
+                state_time = 0;
+                state_duration = decay_time;
 
                 multiplier = 1.0;
                 delta_mult = (sustain_level - 1.0)/decay_time;
@@ -120,8 +90,8 @@ void ADSRFilter::filter(std::vector<SAMPLE>& input, std::vector<SAMPLE>& output,
 
             case decay:
                 state = sustain;
-                trigger_time = t;
-                end_time = t;
+                state_time = 0;
+                state_duration = 0;
 
                 multiplier = sustain_level;
                 delta_mult = 0.0;
@@ -129,8 +99,8 @@ void ADSRFilter::filter(std::vector<SAMPLE>& input, std::vector<SAMPLE>& output,
 
             case release:
                 state = silent;
-                trigger_time = t;
-                end_time = t;
+                state_time = 0;
+                state_duration = 0;
 
                 multiplier = 0.0;
                 delta_mult = 0.0;

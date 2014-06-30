@@ -88,9 +88,6 @@ namespace ClickTrack
      * ability to read in audio data from an output channel, and perform an
      * operation on that input data.
      *
-     * A consumer can optionally trigger a callback function whenever it
-     * consumes its outputs.
-     *
      * EG a speaker is a consumer.
      */
     class AudioConsumer

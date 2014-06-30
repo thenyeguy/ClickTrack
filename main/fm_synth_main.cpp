@@ -2,7 +2,7 @@
 #include "../src/clip_detector.h"
 #include "../src/fm_synth.h"
 #include "../src/limiter.h"
-#include "../src/midi_wrapper.h"
+#include "../src/midi_listener.h"
 #include "../src/oscillator.h"
 #include "../src/speaker.h"
 #include "../src/timing_manager.h"
@@ -14,10 +14,11 @@ int main()
     cout << "Initializing MIDI instrument" << endl;
     TimingManager timing;
 
+    MidiListener midi(timing, 1);
     FMSynth inst(10);
-    timing.add_instrument(&inst);
+    inst.set_input_midi_channel(midi.get_output_midi_channel());
+    timing.add_midi_consumer(&inst);
 
-    MidiListener midi(timing, inst, 1);
 
     inst.set_modulator_intensity(5);
 
@@ -30,7 +31,7 @@ int main()
 
     Speaker out(timing);
     out.set_input_channel(clip.get_output_channel());
-    timing.add_consumer(&out);
+    timing.add_audio_consumer(&out);
 
     cout << "Entering playback loop..." << endl << endl;
     while(true)

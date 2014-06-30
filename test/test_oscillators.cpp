@@ -30,7 +30,7 @@ int main()
 
     Speaker speaker(timer);
     speaker.set_input_channel(gain.get_output_channel());
-    timer.add_consumer(&speaker);
+    timer.add_audio_consumer(&speaker);
 
 
     // Loop small number of times to generate enough audio

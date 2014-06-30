@@ -41,18 +41,17 @@ namespace ClickTrack
             /* The following callbacks are used to trigger and update the state
              * of our voices. They are entirely handled by this generic class.
              */
-            void on_note_down(unsigned note, float velocity, unsigned long time=0);
-            void on_note_up(unsigned note, float velocity, unsigned long time=0);
-            void on_sustain_down(unsigned long time=0);
-            void on_sustain_up(unsigned long time=0);
-            void on_pitch_wheel(float value, unsigned long time=0);
-            void on_modulation_wheel(float value, unsigned long time=0);
+            void on_note_down(unsigned note, float velocity);
+            void on_note_up(unsigned note, float velocity);
+            void on_sustain_down();
+            void on_sustain_up();
+            void on_pitch_wheel(float value);
+            void on_modulation_wheel(float value);
 
             /* Other MIDI messages vary from instrument to instrument. This can
              * be overriden to handle them
              */
-            void on_midi_message(std::vector<unsigned char>* message,
-                    unsigned long time=0);
+            void on_midi_message(MidiMessage message);
 
         private:
             /* Sums our different voices
@@ -85,12 +84,7 @@ namespace ClickTrack
              * trigger the callback handler, which is passed the note as
              * a payload.
              */
-            void on_note_down(unsigned note, float velocity, unsigned long t);
-            static void handle_note_down(DrumAdder& caller, void* payload);
-
-            /* Scheduler for note downs
-             */
-            FunctionScheduler<DrumAdder> scheduler;
+            void on_note_down(unsigned note, float velocity);
 
             /* The following map simply maps MIDI numbers to their drum voice
              */

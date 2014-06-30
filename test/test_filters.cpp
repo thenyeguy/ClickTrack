@@ -25,7 +25,7 @@ int main()
 
     WavWriter wav("wav/test_filters.wav");
     wav.set_input_channel(filter2.get_output_channel());
-    timer.add_consumer(&wav);
+    timer.add_audio_consumer(&wav);
 
 
     std::cout << "Entering process loop" << std::endl;

@@ -35,7 +35,7 @@ int main()
     Speaker speaker(timer, 2);
     speaker.set_input_channel(mic_gain.get_output_channel(), 0);
     speaker.set_input_channel(tri_gain.get_output_channel(), 1);
-    timer.add_consumer(&speaker);
+    timer.add_audio_consumer(&speaker);
 
 
     std::cout << "Entering process loop" << std::endl;

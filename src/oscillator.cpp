@@ -9,7 +9,6 @@ using namespace ClickTrack;
 Oscillator::Oscillator(Mode in_mode, float in_freq)
     : AudioGenerator(1), 
       last_output(0.0), 
-      scheduler(*this), 
       lfo(nullptr),
       lfo_intensity(0.0),
       modulator(nullptr),
@@ -28,12 +27,10 @@ void Oscillator::set_mode(Mode in_mode)
 }
 
 
-void Oscillator::set_freq(float in_freq, unsigned long time)
+void Oscillator::set_freq(float in_freq)
 {
-    // Put the frequency in the payload and schedule the call
-    float* payload = new float;
-    *payload = in_freq;
-    scheduler.schedule(time, Oscillator::set_freq_callback, payload);
+    freq = in_freq;
+    phase_inc = freq * 2*M_PI/SAMPLE_RATE;
 }
 
 
@@ -67,25 +64,8 @@ void Oscillator::set_modulator_intensity(float intensity)
 }
 
 
-void Oscillator::set_freq_callback(Oscillator& caller, void* payload)
-{
-    // Get the payload
-    float* in_freq = (float*) payload;
-
-    // Tracks the current phase to maintain phase during 
-    caller.freq = *in_freq;
-    caller.phase_inc = caller.freq * 2*M_PI/SAMPLE_RATE;
-
-    // Release it
-    delete in_freq;
-}
-
-
 void Oscillator::generate_outputs(std::vector<SAMPLE>& outputs, unsigned long t)
 {
-    // Run event changes
-    scheduler.run(t);
-
     // Compute the LFO contribution
     float lfo_transpose = 1.0;
     if(lfo != nullptr)

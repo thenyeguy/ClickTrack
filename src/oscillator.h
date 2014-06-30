@@ -2,7 +2,6 @@
 #define OSCILLATOR_H
 
 #include "audio_generics.h"
-#include "scheduler.h"
 
 
 namespace ClickTrack
@@ -12,8 +11,6 @@ namespace ClickTrack
      */
     class Oscillator : public AudioGenerator
     {
-        friend class FunctionScheduler<Oscillator>;
-
         public:
             /* The oscillator supports many waveform modes.
              * Blep oscillators use PolyBlep to generate alias-free waveforms
@@ -30,7 +27,7 @@ namespace ClickTrack
              * event at the specified time. If no time is given, applies
              * immediately
              */
-            void set_freq(float freq, unsigned long time=0);
+            void set_freq(float freq);
 
             /* Given an increment in steps, transposes the output frequency of
              * the osciilator by that many steps
@@ -50,11 +47,6 @@ namespace ClickTrack
             void set_modulator_input(AudioChannel* input);
             void set_modulator_intensity(float intensity);
 
-        protected:
-            /* This callback can only be set by the scheduler
-             */
-            static void set_freq_callback(Oscillator& caller, void* payload);
-
         private: 
             /* Overridden method for AudioGenerator to provide basic time
              * tracking and output for oscillators
@@ -64,10 +56,6 @@ namespace ClickTrack
             void generate_outputs(std::vector<SAMPLE>& outputs, unsigned long t);
             float polyBlepOffset(float t);
             float last_output; // used by blep triangle
-
-            /* Used to schedule frequency changes
-             */
-            FunctionScheduler<Oscillator> scheduler;
 
             /* LFO input
              */

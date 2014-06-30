@@ -36,28 +36,25 @@ AudioChannel* DrumMachine::get_output_channel()
 }
 
 
-void DrumMachine::on_note_down(unsigned note, float velocity, 
-        unsigned long time)
+void DrumMachine::on_note_down(unsigned note, float velocity)
 {
-    adder->on_note_down(note, velocity, time);
+    adder->on_note_down(note, velocity);
 }
 
 
 // Ignore every message other than note down
-void DrumMachine::on_note_up(unsigned note, float velocity, 
-        unsigned long time) {}
-void DrumMachine::on_sustain_down(unsigned long time) {}
-void DrumMachine::on_sustain_up(unsigned long time) {}
-void DrumMachine::on_pitch_wheel(float value, unsigned long time) {}
-void DrumMachine::on_modulation_wheel(float value, unsigned long time) {}
-void DrumMachine::on_midi_message(std::vector<unsigned char>* message, 
-        unsigned long time) {}
+void DrumMachine::on_note_up(unsigned note, float velocity) {}
+void DrumMachine::on_sustain_down() {}
+void DrumMachine::on_sustain_up() {}
+void DrumMachine::on_pitch_wheel(float value) {}
+void DrumMachine::on_modulation_wheel(float value) {}
+void DrumMachine::on_midi_message(MidiMessage message) {}
 
 
 
 
 DrumAdder::DrumAdder()
-    : AudioGenerator(1), scheduler(*this), voices()
+    : AudioGenerator(1), voices()
 {}
 
 
@@ -105,9 +102,6 @@ void DrumAdder::set_voice(const std::string& path)
 
 void DrumAdder::generate_outputs(std::vector<SAMPLE>& outputs, unsigned long t)
 {
-    // Run the scheduler
-    scheduler.run(t);
-
     // Compute the output
     outputs[0] = 0.0; 
     for(auto noteAndVoice: voices)
@@ -119,26 +113,13 @@ void DrumAdder::generate_outputs(std::vector<SAMPLE>& outputs, unsigned long t)
     }
 }
 
-void DrumAdder::on_note_down(unsigned note, float velocity, unsigned long t)
+void DrumAdder::on_note_down(unsigned note, float velocity)
 {
     // Ignore if this note doesn't exist
     if(voices.find(note) == voices.end())
         return;
 
-    // Schedule this note
-    unsigned* notePtr = new unsigned;
-    *notePtr = note;
-    scheduler.schedule(t, DrumAdder::handle_note_down, notePtr);
-}
-
-
-void DrumAdder::handle_note_down(DrumAdder& caller, void* payload)
-{
-    // Extract the note
-    unsigned note = *((unsigned*) payload);
-
-    // Trigger the note down
-    caller.voices.at(note)->on_note_down();
+    voices[note]->on_note_down();
 }
 
 

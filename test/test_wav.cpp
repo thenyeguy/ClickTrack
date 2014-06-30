@@ -19,12 +19,12 @@ int main()
         Speaker speaker(timer);
         speaker.set_input_channel(wav.get_output_channel(0),0);
         speaker.set_input_channel(wav.get_output_channel(1),1);
-        timer.add_consumer(&speaker);
+        timer.add_audio_consumer(&speaker);
 
         WavWriter write("wav/out.wav");
         write.set_input_channel(wav.get_output_channel(0),0);
         write.set_input_channel(wav.get_output_channel(1),1);
-        timer.add_consumer(&write);
+        timer.add_audio_consumer(&write);
 
 
         std::cout << "Entering process loop" << std::endl;

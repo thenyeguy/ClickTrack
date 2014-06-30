@@ -140,12 +140,7 @@ AudioFilter::AudioFilter(unsigned in_num_input_channels,
         unsigned in_num_output_channels)
     : AudioGenerator(in_num_output_channels),
       AudioConsumer(in_num_input_channels)
-{
-    for(unsigned i = 0; i < in_num_output_channels; i++)
-    {
-        output_frame.push_back(0.0);
-    }
-}
+{}
 
 
 void AudioFilter::tick(unsigned long t)

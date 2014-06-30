@@ -138,7 +138,7 @@ AudioChannel* SubtractiveSynthVoice::get_output_channel()
 }
 
 
-void SubtractiveSynthVoice::handle_note_down(float velocity, unsigned long time)
+void SubtractiveSynthVoice::handle_note_down(float velocity)
 {
 
     // Set velocity gain
@@ -146,20 +146,20 @@ void SubtractiveSynthVoice::handle_note_down(float velocity, unsigned long time)
     adsr.set_gain(pow(velocity,0.5));
 
     // Trigger frequency and ADSR change
-    osc1.set_freq(freq*pitch_multiplier, time);
-    osc2.set_freq(freq*pitch_multiplier, time);
-    adsr.on_note_down(time);
+    osc1.set_freq(freq*pitch_multiplier);
+    osc2.set_freq(freq*pitch_multiplier);
+    adsr.on_note_down();
 }
 
 
-void SubtractiveSynthVoice::handle_note_up(unsigned long time)
+void SubtractiveSynthVoice::handle_note_up()
 {
-    adsr.on_note_up(time);
+    adsr.on_note_up();
 }
 
 
-void SubtractiveSynthVoice::handle_pitch_wheel(float value, unsigned long time)
+void SubtractiveSynthVoice::handle_pitch_wheel(float value)
 {
-    osc1.set_freq(freq*pitch_multiplier, time);
-    osc2.set_freq(freq*pitch_multiplier, time);
+    osc1.set_freq(freq*pitch_multiplier);
+    osc2.set_freq(freq*pitch_multiplier);
 }

@@ -142,26 +142,26 @@ AudioChannel* FMSynthVoice::get_output_channel()
 }
 
 
-void FMSynthVoice::handle_note_down(float velocity, unsigned long time)
+void FMSynthVoice::handle_note_down(float velocity)
 {
     // Set velocity gain
     adsr.set_gain(pow(velocity,0.5));
 
     // Trigger frequency and ADSR change
-    carrier.set_freq(freq*pitch_multiplier, time);
-    modulator.set_freq(freq*pitch_multiplier, time);
-    adsr.on_note_down(time);
+    carrier.set_freq(freq*pitch_multiplier);
+    modulator.set_freq(freq*pitch_multiplier);
+    adsr.on_note_down();
 }
 
 
-void FMSynthVoice::handle_note_up(unsigned long time)
+void FMSynthVoice::handle_note_up()
 {
-    adsr.on_note_up(time);
+    adsr.on_note_up();
 }
 
 
-void FMSynthVoice::handle_pitch_wheel(float value, unsigned long time)
+void FMSynthVoice::handle_pitch_wheel(float value)
 {
-    carrier.set_freq(freq*pitch_multiplier, time);
-    modulator.set_freq(freq*pitch_multiplier, time);
+    carrier.set_freq(freq*pitch_multiplier);
+    modulator.set_freq(freq*pitch_multiplier);
 }

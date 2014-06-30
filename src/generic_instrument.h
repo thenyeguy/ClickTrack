@@ -2,25 +2,15 @@
 #define GENERIC_INSTRUMENT_H
 
 #include "audio_generics.h"
+#include "midi_generics.h"
 
 
 namespace ClickTrack
 {
-    /* Converts a MIDI note number to a frequency
-     */
-    float midiNoteToFreq(unsigned note);
-
-
     /* The Generic Instrument is an abstract class that defines the interface
      * for a MIDI instrument class.
-     *
-     * The instrument has no means to trigger its own notes. Instead, it must be
-     * attached to some listener (eg a MidiListener), that will then call the
-     * event handlers.
-     *
-     * This attachment must be done at initialization time by the user.
      */
-    class GenericInstrument
+    class GenericInstrument : public MidiConsumer
     {
         public:
             GenericInstrument();
@@ -31,42 +21,44 @@ namespace ClickTrack
             AudioChannel* get_output_channel(int channel=0);
             const unsigned get_num_output_channels();
 
-            /* The following functions are called by the listener. They are
+        protected:
+            /* This function implements the logic for handling incoming MIDI
+             * events. It calls the functions below.
+             */
+            void process_events(std::vector<MidiMessage>& inputs,
+                    unsigned long t);
+
+            /* The following functions are called by the midi consumer. They are
              * responsible for handling the messages sent to our instrument.
              * Must be overrideen.
              *
-             * Some messages are parsed and identified by the MidiIn class. If
-             * so, they use the named message types below. If a message is not
-             * special handled, then the original message is passed directly to
-             * the instrument using on_midi_message, for custom handling.
+             * Some messages are parsed and identified by tis class. If so, they
+             * use the named message types below. If a message is not special
+             * handled, then the original message is passed directly to the
+             * instrument using on_midi_message, for custom handling.
              *
              * All our handlers take a time to trigger, in sample time. A time
              * of zero means to trigger at the moment the message is received.
              */ 
-            virtual void on_note_down(unsigned note, float velocity,
-                    unsigned long time=0) = 0;
-            virtual void on_note_up(unsigned note, float velocity,
-                    unsigned long time=0) = 0;
+            virtual void on_note_down(unsigned note, float velocity) = 0;
+            virtual void on_note_up(unsigned note, float velocity) = 0;
 
-            virtual void on_sustain_down(unsigned long time=0) = 0;
-            virtual void on_sustain_up(unsigned long time=0) = 0;
+            virtual void on_sustain_down() = 0;
+            virtual void on_sustain_up() = 0;
 
-            virtual void on_pitch_wheel(float value, 
-                    unsigned long time=0) = 0;
-            virtual void on_modulation_wheel(float value, 
-                    unsigned long time=0) = 0;
+            virtual void on_pitch_wheel(float value) = 0;
+            virtual void on_modulation_wheel(float value) = 0;
 
-            virtual void on_midi_message(std::vector<unsigned char>* message,
-                    unsigned long time=0) = 0;
+            virtual void on_midi_message(MidiMessage message) = 0;
 
-        protected:
-            /* Used by subclasses to add their own output channels
+            /* Used by subclasses to add their own output channels. This must be
+             * done during initialization of the subclass, and tells the
+             * instrument where the final output is.
              */
             void add_output_channel(AudioChannel* channel);
 
         private:
-            /* A vector of all our output channels. The subclass must push their
-             * output channels into this vector.
+            /* A vector of all our output channels.
              */
             std::vector<AudioChannel*> output_channels;
     };

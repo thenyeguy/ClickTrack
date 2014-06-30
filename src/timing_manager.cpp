@@ -5,29 +5,31 @@ using namespace ClickTrack;
 
 TimingManager::TimingManager()
     : time(0),
-      consumers(), 
-      instruments(),
+      midi_consumers(), 
+      audio_consumers(),
       last_sync()
 {
     last_sync.synced = false;
 }
 
 
-void TimingManager::add_instrument(GenericInstrument* instrument)
+void TimingManager::add_midi_consumer(MidiConsumer* consumer)
 {
-    instruments.push_back(instrument);
+    midi_consumers.push_back(consumer);
 }
 
 
-void TimingManager::add_consumer(AudioConsumer* consumer)
+void TimingManager::add_audio_consumer(AudioConsumer* consumer)
 {
-    consumers.push_back(consumer);
+    audio_consumers.push_back(consumer);
 }
 
 
 void TimingManager::tick()
 {
-    for(auto consumer : consumers)
+    for(auto consumer : midi_consumers)
+        consumer->tick(time);
+    for(auto consumer : audio_consumers)
         consumer->tick(time);
     time++;
 }

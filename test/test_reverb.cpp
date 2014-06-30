@@ -22,7 +22,7 @@ int main()
 
         Speaker out(timer);
         out.set_input_channel(rev.get_output_channel());
-        timer.add_consumer(&out);
+        timer.add_audio_consumer(&out);
 
 
         std::cout << "Playing" << std::endl;

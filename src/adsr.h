@@ -2,7 +2,6 @@
 #define ADSR_H
 
 #include "audio_generics.h"
-#include "scheduler.h"
 
 
 namespace ClickTrack
@@ -21,11 +20,8 @@ namespace ClickTrack
 
             /* These functions are used to trigger the envelope to begin or end
              */
-            void on_note_down(unsigned long time=0);
-            void on_note_up(unsigned long time=0);
-
-            static void note_down_callback(ADSRFilter& caller, void* payload);
-            static void note_up_callback(ADSRFilter& caller, void* payload);
+            void on_note_down();
+            void on_note_up();
 
             /* Setters for parameters
              */
@@ -39,10 +35,6 @@ namespace ClickTrack
             void filter(std::vector<SAMPLE>& input,
                     std::vector<SAMPLE>& output, unsigned long t);
 
-            /* Used to schedule note events
-             */
-            FunctionScheduler<ADSRFilter> scheduler;
-
             /* ADSR filter is in several states, and transitions in order
              * through these states during its operation. When transitioning to
              * each state, the startTime is set to the trigger time again.
@@ -50,8 +42,8 @@ namespace ClickTrack
             enum ADSRState { silent, attack, decay, sustain, release };
             ADSRState state;
 
-            unsigned trigger_time;
-            unsigned end_time;
+            unsigned state_time;
+            unsigned state_duration;
 
             /* Internally, we adjust the multiplier by a constant every time
              * step. The multiplier is reset based on its target when we change

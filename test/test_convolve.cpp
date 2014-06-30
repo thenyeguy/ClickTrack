@@ -29,12 +29,12 @@ int main()
         WavWriter out("wav/conv_out.wav");
         out.set_input_channel(revl.get_output_channel(),0);
         out.set_input_channel(revr.get_output_channel(),1);
-        timing.add_consumer(&out);
+        timing.add_audio_consumer(&out);
 
         Speaker speaker(timing, 2);
         speaker.set_input_channel(revl.get_output_channel(),0);
         speaker.set_input_channel(revr.get_output_channel(),1);
-        timing.add_consumer(&speaker);
+        timing.add_audio_consumer(&speaker);
 
         std::cout << "Entering playback loop..." << std::endl << std::endl;
         while(!in.is_done())

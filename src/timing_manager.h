@@ -21,8 +21,8 @@ namespace ClickTrack
              * instruments and audio consumers during initialization in the
              * signal chain in order to process them.
              */
-            void add_instrument(GenericInstrument* instrument);
-            void add_consumer(AudioConsumer* consumer);
+            void add_midi_consumer(MidiConsumer* consumer);
+            void add_audio_consumer(AudioConsumer* consumer);
 
             /* Used to tick the processing one time step forward
              */
@@ -53,10 +53,10 @@ namespace ClickTrack
              */
             unsigned long time;
 
-            /* A list of instruments and consumers that need processing
+            /* Lists of consumers that need processing
              */
-            std::vector<AudioConsumer*> consumers;
-            std::vector<GenericInstrument*> instruments;
+            std::vector<MidiConsumer*> midi_consumers;
+            std::vector<AudioConsumer*> audio_consumers;
 
             /* The last synchronization status
              */
