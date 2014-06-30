@@ -23,9 +23,7 @@ namespace ClickTrack
              */
             void set_mode(Mode mode);
 
-            /* Sets the frequency; uses a function scheduler to trigger this
-             * event at the specified time. If no time is given, applies
-             * immediately
+            /* Sets the frequency
              */
             void set_freq(float freq);
 

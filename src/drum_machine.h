@@ -7,7 +7,6 @@
 #include "audio_generics.h"
 #include "gain_filter.h"
 #include "generic_instrument.h"
-#include "scheduler.h"
 
 namespace ClickTrack
 {
@@ -79,10 +78,6 @@ namespace ClickTrack
             void generate_outputs(std::vector<SAMPLE>& outputs, unsigned long t);
 
             /* Callback to trigger a note. Only called by a drum machine.
-             *
-             * The function is scheduled, and will use the function scheduler to
-             * trigger the callback handler, which is passed the note as
-             * a payload.
              */
             void on_note_down(unsigned note, float velocity);
 
