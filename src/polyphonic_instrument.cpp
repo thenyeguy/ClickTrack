@@ -17,7 +17,7 @@ PolyphonicInstrument::~PolyphonicInstrument()
 }
 
 
-Channel* PolyphonicInstrument::get_output_channel()
+AudioChannel* PolyphonicInstrument::get_output_channel()
 {
     return adder.get_output_channel();
 }

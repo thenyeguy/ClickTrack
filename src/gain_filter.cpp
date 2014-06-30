@@ -14,7 +14,7 @@ void GainFilter::set_gain(float in_gain)
     gain = pow(10, in_gain/10);
 }
 
-void GainFilter::set_lfo_input(Channel* input)
+void GainFilter::set_lfo_input(AudioChannel* input)
 {
     lfo = input;
 }

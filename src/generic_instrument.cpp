@@ -15,16 +15,16 @@ GenericInstrument::GenericInstrument()
 {}
 
 
-void GenericInstrument::add_output_channel(Channel* channel)
+void GenericInstrument::add_output_channel(AudioChannel* channel)
 {
     output_channels.push_back(channel);
 }
 
 
-Channel* GenericInstrument::get_output_channel(int channel)
+AudioChannel* GenericInstrument::get_output_channel(int channel)
 {
     if(channel > output_channels.size())
-        throw ChannelOutOfRange();
+        throw AudioChannelOutOfRange();
     return output_channels[channel];
 }
 

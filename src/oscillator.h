@@ -41,13 +41,13 @@ namespace ClickTrack
              * degree; this can be fractional. If no LFO is specified, or if the
              * input is set to nullptr, no modulation is done.
              */
-            void set_lfo_input(Channel* input);
+            void set_lfo_input(AudioChannel* input);
             void set_lfo_intensity(float steps);
 
             /* The modulator performs frequency modulation of the oscillator
              * with modulation index given by the intensity
              */
-            void set_modulator_input(Channel* input);
+            void set_modulator_input(AudioChannel* input);
             void set_modulator_intensity(float intensity);
 
         protected:
@@ -71,12 +71,12 @@ namespace ClickTrack
 
             /* LFO input
              */
-            Channel* lfo;
+            AudioChannel* lfo;
             float lfo_intensity;
 
             /* Modulation input
              */
-            Channel* modulator;
+            AudioChannel* modulator;
             float mod_intensity;
 
             /* Phase state

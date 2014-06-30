@@ -22,7 +22,7 @@ namespace ClickTrack
              * decibels, i.e. tremolo. Setting the LFO to nullptr will remove
              * any LFO effect
              */
-            void set_lfo_input(Channel* input);
+            void set_lfo_input(AudioChannel* input);
             void set_lfo_intensity(float db);
 
         private:
@@ -31,7 +31,7 @@ namespace ClickTrack
 
             float gain;
 
-            Channel* lfo;
+            AudioChannel* lfo;
             float lfo_intensity;
     };
 }

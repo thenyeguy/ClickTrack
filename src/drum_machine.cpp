@@ -30,7 +30,7 @@ DrumMachine::~DrumMachine()
 }
 
 
-Channel* DrumMachine::get_output_channel()
+AudioChannel* DrumMachine::get_output_channel()
 {
     return volume.get_output_channel();
 }

@@ -23,7 +23,7 @@ namespace ClickTrack
 
             /* Override because we have added more signal chain
              */
-            Channel* get_output_channel();
+            AudioChannel* get_output_channel();
 
             /* Sets the output gain of the synth, in decibels
              */
@@ -83,7 +83,7 @@ namespace ClickTrack
 
             /* Gets the output of this voice
              */
-            Channel* get_output_channel();
+            AudioChannel* get_output_channel();
 
             /* Callbacks for starting and stopping notes
              */

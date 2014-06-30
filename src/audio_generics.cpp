@@ -5,17 +5,17 @@
 using namespace ClickTrack;
 
 
-Channel::Channel(AudioGenerator& in_parent, unsigned long start_t)
+AudioChannel::AudioChannel(AudioGenerator& in_parent, unsigned long start_t)
     : parent(in_parent), last_sample(0.0), next_time(start_t)
 {}
 
 
-SAMPLE Channel::get_sample(unsigned long t)
+SAMPLE AudioChannel::get_sample(unsigned long t)
 {
     // If this block already fell out of the buffer, just return silence
     if(next_time > t+1)
     {
-        std::cerr << "Channel has requested a time older than is in "
+        std::cerr << "AudioChannel has requested a time older than is in "
             << "its buffer." << std::endl;
         return 0.0;
     }
@@ -28,7 +28,7 @@ SAMPLE Channel::get_sample(unsigned long t)
 }
 
 
-void Channel::push_sample(SAMPLE s)
+void AudioChannel::push_sample(SAMPLE s)
 {
     last_sample = s;
     next_time++;
@@ -42,7 +42,7 @@ AudioGenerator::AudioGenerator(unsigned in_num_output_channels)
 {
     for(unsigned i = 0; i < in_num_output_channels; i++)
     {
-        output_channels.push_back(Channel(*this));
+        output_channels.push_back(AudioChannel(*this));
         output_frame.push_back(0.0);
     }
 }
@@ -54,10 +54,10 @@ unsigned AudioGenerator::get_num_output_channels()
 }
 
 
-Channel* AudioGenerator::get_output_channel(unsigned i)
+AudioChannel* AudioGenerator::get_output_channel(unsigned i)
 {
     if(i >= output_channels.size())
-        throw ChannelOutOfRange();
+        throw AudioChannelOutOfRange();
     return &output_channels[i];
 }
 
@@ -82,7 +82,7 @@ AudioConsumer::AudioConsumer(unsigned in_num_input_channels)
 }
 
 
-void AudioConsumer::set_input_channel(Channel* channel, unsigned channel_i)
+void AudioConsumer::set_input_channel(AudioChannel* channel, unsigned channel_i)
 {
     input_channels[channel_i] = channel;
 }
@@ -94,7 +94,7 @@ void AudioConsumer::remove_channel(unsigned channel_i)
 }
 
 
-unsigned AudioConsumer::get_channel_index(Channel* channel)
+unsigned AudioConsumer::get_channel_index(AudioChannel* channel)
 {
     for(unsigned i = 0; i < input_channels.size(); i++)
     {
@@ -102,7 +102,7 @@ unsigned AudioConsumer::get_channel_index(Channel* channel)
             return i;
     }
 
-    throw ChannelNotFound();
+    throw AudioChannelNotFound();
 }
 
 
@@ -139,7 +139,7 @@ void AudioConsumer::tick(unsigned long t)
 AudioFilter::AudioFilter(unsigned in_num_input_channels,
         unsigned in_num_output_channels)
     : AudioGenerator(in_num_output_channels),
-      AudioConsumer(in_num_input_channels), output_frame()
+      AudioConsumer(in_num_input_channels)
 {
     for(unsigned i = 0; i < in_num_output_channels; i++)
     {
@@ -172,11 +172,3 @@ void AudioFilter::tick(unsigned long t)
     for(unsigned i = 0; i < output_channels.size(); i++)
         output_channels[i].push_sample(output_frame[i]);
 }
-
-
-void AudioFilter::generate_outputs(std::vector<SAMPLE>& outputs, unsigned long t)
-{}
-
-
-void AudioFilter::process_inputs(std::vector<SAMPLE>& inputs, unsigned long t)
-{}

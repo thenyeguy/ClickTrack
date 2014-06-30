@@ -34,7 +34,7 @@ FMSynth::FMSynth(int num_voices)
 }
 
 
-Channel* FMSynth::get_output_channel()
+AudioChannel* FMSynth::get_output_channel()
 {
     return volume.get_output_channel();
 }
@@ -136,7 +136,7 @@ FMSynthVoice::FMSynthVoice(FMSynth* in_parent_synth)
 }
 
 
-Channel* FMSynthVoice::get_output_channel()
+AudioChannel* FMSynthVoice::get_output_channel()
 {
     return adsr.get_output_channel();
 }

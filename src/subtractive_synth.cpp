@@ -35,7 +35,7 @@ SubtractiveSynth::SubtractiveSynth(int num_voices)
 }
 
 
-Channel* SubtractiveSynth::get_output_channel()
+AudioChannel* SubtractiveSynth::get_output_channel()
 {
     return volume.get_output_channel();
 }
@@ -132,7 +132,7 @@ SubtractiveSynthVoice::SubtractiveSynthVoice(SubtractiveSynth* in_parent_synth)
 }
 
 
-Channel* SubtractiveSynthVoice::get_output_channel()
+AudioChannel* SubtractiveSynthVoice::get_output_channel()
 {
     return adsr.get_output_channel();
 }

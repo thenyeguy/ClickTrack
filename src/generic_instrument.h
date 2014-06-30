@@ -28,7 +28,7 @@ namespace ClickTrack
             /* Exposes the final output channel of the instrument, so that it
              * may be plugged later into the signal chain.
              */
-            Channel* get_output_channel(int channel=0);
+            AudioChannel* get_output_channel(int channel=0);
             const unsigned get_num_output_channels();
 
             /* The following functions are called by the listener. They are
@@ -62,13 +62,13 @@ namespace ClickTrack
         protected:
             /* Used by subclasses to add their own output channels
              */
-            void add_output_channel(Channel* channel);
+            void add_output_channel(AudioChannel* channel);
 
         private:
             /* A vector of all our output channels. The subclass must push their
              * output channels into this vector.
              */
-            std::vector<Channel*> output_channels;
+            std::vector<AudioChannel*> output_channels;
     };
 }
 

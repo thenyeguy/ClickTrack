@@ -23,7 +23,7 @@ namespace ClickTrack
              * adder, you must override the following function to return the
              * output channel
              */
-            virtual Channel* get_output_channel();
+            virtual AudioChannel* get_output_channel();
 
             /* The following callbacks are used to trigger and update the state
              * of our voices. They are entirely handled by this generic class.
@@ -102,7 +102,7 @@ namespace ClickTrack
             /* The output channel must defined by the subclass, as we do not
              * know the signal chain
              */
-            virtual Channel* get_output_channel() = 0;
+            virtual AudioChannel* get_output_channel() = 0;
 
             /* Returns if this voice is playing now
              */

@@ -28,7 +28,7 @@ namespace ClickTrack
             DrumMachine(const std::string& path);
             ~DrumMachine();
 
-            Channel* get_output_channel();
+            AudioChannel* get_output_channel();
 
             /* Reloads all voices from a new path
              */

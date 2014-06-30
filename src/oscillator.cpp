@@ -43,7 +43,7 @@ void Oscillator::set_transposition(float steps)
 }
 
 
-void Oscillator::set_lfo_input(Channel* input)
+void Oscillator::set_lfo_input(AudioChannel* input)
 {
     lfo = input;
 }
@@ -55,7 +55,7 @@ void Oscillator::set_lfo_intensity(float steps)
 }
 
 
-void Oscillator::set_modulator_input(Channel* input)
+void Oscillator::set_modulator_input(AudioChannel* input)
 {
     modulator = input;
 }
