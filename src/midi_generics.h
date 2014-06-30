@@ -156,7 +156,6 @@ namespace ClickTrack
             virtual ~MidiFilter() {}
 
         protected:
-
             /* When called, reads in the next frame from the input channels,
              * processes it and write to the output channels.
              */
@@ -165,15 +164,15 @@ namespace ClickTrack
             /* Given an input frame, generate a frame of output data. Must be
              * overwritten in subclass.
              */
-            virtual void filter_events(std::vector<MidiMessage>& input, 
-                    std::vector<MidiMessage>& output, unsigned long t) = 0;
+            virtual void filter_events(std::vector<MidiMessage>& inputs, 
+                    std::vector<MidiMessage>& outputs, unsigned long t) = 0;
 
         private:
             /* To properly implement the tick override, these functions must be
              * defined. They do nothing.
              */
-            void generate_outputs(std::vector<MidiMessage>& inputs, unsigned long t) {}
-            void process_inputs(std::vector<MidiMessage>& outputs, unsigned long t) {}
+            void generate_events(std::vector<MidiMessage>& inputs, unsigned long t) {}
+            void process_events(std::vector<MidiMessage>& outputs, unsigned long t) {}
     };
 }
 
