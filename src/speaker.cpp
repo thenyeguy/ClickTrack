@@ -3,9 +3,12 @@
 using namespace ClickTrack;
 
 
-Speaker::Speaker(unsigned num_inputs, bool defaultDevice)
-    : AudioConsumer(num_inputs), buffer(), stream(num_inputs,defaultDevice),
-      callback(NULL), payload(NULL)
+Speaker::Speaker(TimingManager& in_timer, unsigned num_inputs, bool defaultDevice)
+    : AudioConsumer(num_inputs), 
+      buffer(), 
+      stream(num_inputs,defaultDevice),
+      timer(in_timer)
+
 {
     for(unsigned i = 0; i < num_inputs; i++)
         buffer.push_back(std::vector<SAMPLE>(BUFFER_SIZE));
@@ -22,16 +25,6 @@ void Speaker::process_inputs(std::vector<SAMPLE>& inputs, unsigned long t)
     if((t+1) % BUFFER_SIZE == 0)
     {
         stream.writeToStream(buffer);
-
-        // Run the callback
-        if(callback != NULL)
-            callback(t+1, payload);
+        timer.synchronize(t);
     }
-}
-
-
-void Speaker::register_callback(callback_t in_callback, void* in_payload)
-{
-    callback = in_callback;
-    payload = in_payload;
 }

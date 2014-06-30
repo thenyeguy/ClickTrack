@@ -13,6 +13,8 @@ using namespace ClickTrack;
 int main()
 {
     std::cout << "Initializing signal chain" << std::endl;
+    TimingManager timer;
+
     WavReader impulse("wav/delta.wav");
 
     SecondOrderFilter filter(SecondOrderFilter::PEAK, 5000, -3, 10.0);
@@ -23,8 +25,6 @@ int main()
 
     WavWriter wav("wav/test_filters.wav");
     wav.set_input_channel(filter2.get_output_channel());
-
-    TimingManager timer;
     timer.add_consumer(&wav);
 
 

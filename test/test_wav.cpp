@@ -12,18 +12,18 @@ int main()
     try
     {
         std::cout << "Initializing signal chain" << std::endl;
+        TimingManager timer;
+
         WavReader wav("wav/test.wav");
 
-        Speaker speaker;
+        Speaker speaker(timer);
         speaker.set_input_channel(wav.get_output_channel(0),0);
         speaker.set_input_channel(wav.get_output_channel(1),1);
+        timer.add_consumer(&speaker);
 
         WavWriter write("wav/out.wav");
         write.set_input_channel(wav.get_output_channel(0),0);
         write.set_input_channel(wav.get_output_channel(1),1);
-
-        TimingManager timer;
-        timer.add_consumer(&speaker);
         timer.add_consumer(&write);
 
 

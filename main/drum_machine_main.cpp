@@ -11,19 +11,19 @@ int main()
     using namespace std;
 
     cout << "Initializing MIDI instrument" << endl;
+    TimingManager timing;
+
     DrumMachine drum("samples/roland808/");
-    MidiListener midi(&drum, 1);
+    timing.add_instrument(&drum);
+
+    MidiListener midi(timing, drum, 1);
 
     cout << "Initializing signal chain" << endl;
     ClipDetector clip(1.0);
     clip.set_input_channel(drum.get_output_channel());
 
-    Speaker out;
+    Speaker out(timing);
     out.set_input_channel(clip.get_output_channel());
-    out.register_callback(MidiListener::timing_callback, &midi);
-
-    TimingManager timing;
-    timing.add_instrument(&drum);
     timing.add_consumer(&out);
 
     cout << "Entering playback loop..." << endl << endl;

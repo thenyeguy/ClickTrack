@@ -13,15 +13,15 @@ int main()
     try
     {
         std::cout << "Establishing signal chain" << std::endl;
+        TimingManager timer;
+
         Microphone mic;
 
         MoorerReverb rev(MoorerReverb::HALL, 1.0, 0.3, 0.5, 1);
         rev.set_input_channel(mic.get_output_channel());
 
-        Speaker out;
+        Speaker out(timer);
         out.set_input_channel(rev.get_output_channel());
-
-        TimingManager timer;
         timer.add_consumer(&out);
 
 

@@ -12,6 +12,7 @@ using namespace ClickTrack;
 int main()
 {
     std::cout << "Initializing signal chain" << std::endl;
+    TimingManager timer;
 
     // Set up oscillator
     Oscillator osc(Oscillator::BlepTri, 440);
@@ -27,10 +28,8 @@ int main()
     gain.set_lfo_input(lfo.get_output_channel());
     gain.set_lfo_intensity(3);
 
-    Speaker speaker;
+    Speaker speaker(timer);
     speaker.set_input_channel(gain.get_output_channel());
-
-    TimingManager timer;
     timer.add_consumer(&speaker);
 
 

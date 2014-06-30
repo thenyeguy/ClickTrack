@@ -12,23 +12,24 @@ int main()
     using namespace std;
 
     cout << "Initializing MIDI instrument" << endl;
+    TimingManager timing;
+
     SubtractiveSynth inst(10);
-    MidiListener midi(&inst, 1);
+    timing.add_instrument(&inst);
+
+    MidiListener midi(timing, inst, 1);
 
     inst.filter.set_cutoff(1000);
     inst.set_lfo_vibrato(0.1);
     inst.set_lfo_tremolo(.2);
 
     cout << "Initializing signal chain" << endl;
+
     Limiter limiter(-3.0);
     limiter.set_input_channel(inst.get_output_channel());
 
-    Speaker out;
+    Speaker out(timing);
     out.set_input_channel(limiter.get_output_channel());
-    out.register_callback(MidiListener::timing_callback, &midi);
-
-    TimingManager timing;
-    timing.add_instrument(&inst);
     timing.add_consumer(&out);
 
     cout << "Entering playback loop..." << endl << endl;

@@ -14,6 +14,8 @@ using namespace ClickTrack;
 int main()
 {
     std::cout << "Initializing signal chain" << std::endl;
+    TimingManager timer;
+
     Microphone mic;
 
     Delay delay(0.5, 0.5, 0.5);
@@ -30,11 +32,9 @@ int main()
     add.set_input_channel(mic_gain.get_output_channel(), 0);
     add.set_input_channel(tri_gain.get_output_channel(), 1);
 
-    Speaker speaker(2);
+    Speaker speaker(timer, 2);
     speaker.set_input_channel(mic_gain.get_output_channel(), 0);
     speaker.set_input_channel(tri_gain.get_output_channel(), 1);
-
-    TimingManager timer;
     timer.add_consumer(&speaker);
 
 

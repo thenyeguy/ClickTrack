@@ -8,9 +8,9 @@ using namespace ClickTrack;
 namespace chr = std::chrono;
 
 
-MidiListener::MidiListener(GenericInstrument* in_inst, int channel)
-    : stream(), inst(in_inst), 
-      buffer_timestamp(chr::high_resolution_clock::now()), next_buffer_time(0)
+MidiListener::MidiListener(TimingManager& in_timer, GenericInstrument& in_inst, 
+        int channel)
+    : stream(), inst(in_inst), timer(in_timer)
 {
     // If no channel specified, ask the user for a channel
     if(channel == -1)
@@ -52,18 +52,20 @@ void MidiListener::midi_callback(double deltaTime, std::vector<unsigned char>* m
     }
 
     // Get the offset, delay by one frame, if we have received callback info
-    unsigned long time = 0;
-    if(listener->next_buffer_time != 0) 
+    unsigned long time = listener->timer.get_current_time();
+    TimingManager::SynchronizationStatus sync = 
+        listener->timer.get_last_synchronization();
+    if(sync.synced) 
     {
         auto diff = chr::high_resolution_clock::now() - 
-            listener->buffer_timestamp;
+            sync.timestamp;
         double nanos = chr::duration_cast<chr::nanoseconds>(diff).count();
         unsigned long delay = nanos / 1e9 * SAMPLE_RATE;
-        time = listener->next_buffer_time + BUFFER_SIZE + delay;
+        time = sync.sample_time + BUFFER_SIZE + delay;
     }
 
     // Cast listener to correct type, then case on message type
-    GenericInstrument* inst = listener->inst;
+    GenericInstrument& inst = listener->inst;
     unsigned char first = message->at(0);
     unsigned char type = first >> 4;
     //unsigned char channel = first & 0x0F;
@@ -73,7 +75,7 @@ void MidiListener::midi_callback(double deltaTime, std::vector<unsigned char>* m
         {
             unsigned char note = message->at(1);
             float veloc = double(message->at(2))/100;
-            inst->on_note_down(note, veloc, time);
+            inst.on_note_down(note, veloc, time);
             break;
         }
 
@@ -81,7 +83,7 @@ void MidiListener::midi_callback(double deltaTime, std::vector<unsigned char>* m
         {
             unsigned char note = message->at(1);
             float veloc = double(message->at(2))/100;
-            inst->on_note_up(note, veloc, time);
+            inst.on_note_up(note, veloc, time);
             break;
         }
 
@@ -92,16 +94,16 @@ void MidiListener::midi_callback(double deltaTime, std::vector<unsigned char>* m
                 case 0x01: // modulation wheel
                 {
                     float value = (float)message->at(2) / 127;
-                    inst->on_modulation_wheel(value, time);
+                    inst.on_modulation_wheel(value, time);
                     break;
                 }
 
                 case 0x40: // sustain pedal
                 {
                     if(message->at(2) < 63)
-                        inst->on_sustain_up(time);
+                        inst.on_sustain_up(time);
                     else
-                        inst->on_sustain_down(time);
+                        inst.on_sustain_down(time);
 
                     break;
                 }
@@ -121,7 +123,7 @@ void MidiListener::midi_callback(double deltaTime, std::vector<unsigned char>* m
             int centered = value - 0x2000;
             float bend = (float)centered / 0x2000;
 
-            inst->on_pitch_wheel(bend, time);
+            inst.on_pitch_wheel(bend, time);
             break;
         }
         
@@ -134,15 +136,7 @@ void MidiListener::midi_callback(double deltaTime, std::vector<unsigned char>* m
                     (unsigned) message->at(i);
             std::cout << std::endl;
 
-            inst->on_midi_message(message, time);
+            inst.on_midi_message(message, time);
         }
     }
-}
-
-
-void MidiListener::timing_callback(unsigned long time, void* payload)
-{
-    MidiListener* listener = (MidiListener*) payload;
-    listener->buffer_timestamp = chr::high_resolution_clock::now();
-    listener->next_buffer_time = time;
 }

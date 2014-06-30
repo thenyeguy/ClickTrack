@@ -4,8 +4,13 @@ using namespace ClickTrack;
 
 
 TimingManager::TimingManager()
-    : consumers(), instruments(), time(0)
-{}
+    : time(0),
+      consumers(), 
+      instruments(),
+      last_sync()
+{
+    last_sync.synced = false;
+}
 
 
 void TimingManager::add_instrument(GenericInstrument* instrument)
@@ -31,4 +36,16 @@ void TimingManager::tick()
 unsigned long TimingManager::get_current_time()
 {
     return time;
+}
+
+
+void TimingManager::synchronize(unsigned long t)
+{
+    last_sync = {true, t, std::chrono::high_resolution_clock::now()};
+}
+
+
+TimingManager::SynchronizationStatus TimingManager::get_last_synchronization()
+{
+    return last_sync;
 }

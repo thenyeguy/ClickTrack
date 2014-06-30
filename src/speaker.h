@@ -3,6 +3,7 @@
 
 #include "audio_generics.h"
 #include "portaudio_wrapper.h"
+#include "timing_manager.h"
 
 
 namespace ClickTrack
@@ -13,14 +14,8 @@ namespace ClickTrack
     class Speaker : public AudioConsumer
     {
         public:
-            Speaker(unsigned num_inputs = 1, bool defaultDevice=true);
-
-            /* This callback is called whenever we write out to the stream. It
-             * passes the starting time of next the buffer to be filled, and the
-             * void* payload provided.
-             */
-            typedef void (*callback_t)(unsigned long time, void* payload);
-            void register_callback(callback_t callback, void* payload);
+            Speaker(TimingManager& timer, unsigned num_inputs = 1, 
+                    bool defaultDevice=true);
 
         private:
             void process_inputs(std::vector<SAMPLE>& input, unsigned long t);
@@ -30,10 +25,9 @@ namespace ClickTrack
             std::vector< std::vector<SAMPLE> > buffer;
             OutputStream stream;
 
-            /* The callback function
+            /* The TimingManager used for synchronization
              */
-            callback_t callback;
-            void* payload;
+            TimingManager& timer;
     };
 }
 

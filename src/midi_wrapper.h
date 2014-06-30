@@ -4,6 +4,7 @@
 #include <chrono>
 #include <rtmidi.h>
 #include "generic_instrument.h"
+#include "timing_manager.h"
 
 
 namespace ClickTrack
@@ -24,12 +25,8 @@ namespace ClickTrack
              * If no channel is provided, the constructor asks which channel
              * to use.
              */
-            MidiListener(GenericInstrument* inst, int channel=-1);
-
-            /* Callback to pass to the speaker for timing management. The
-             * payload should be a pointer to the MidiListener object
-             */
-            static void timing_callback(unsigned long time, void* payload);
+            MidiListener(TimingManager& timer, GenericInstrument& inst,
+                    int channel=-1);
 
         private:
             /* Callback for registering with the input stream
@@ -42,13 +39,8 @@ namespace ClickTrack
             /* State for MIDI
              */
             RtMidiIn stream;
-            GenericInstrument* inst;
-
-            /* State for timing and computing buffer offsets
-             */
-            std::chrono::time_point<std::chrono::high_resolution_clock,
-                std::chrono::duration<double> > buffer_timestamp;
-            unsigned long next_buffer_time;
+            GenericInstrument& inst;
+            TimingManager& timer;
     };
 }
 
