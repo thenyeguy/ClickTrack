@@ -54,7 +54,7 @@ namespace ClickTrack
              */
             std::vector<MidiMessage> get_events(unsigned long t);
 
-        protected:
+        private:
             /* A channel can only exist within an audio generator, so protect
              * the constructor
              */
@@ -79,6 +79,7 @@ namespace ClickTrack
     class MidiGenerator
     {
         friend class MidiChannel;
+        friend class MidiFilter;
 
         public:
             MidiGenerator();
@@ -88,7 +89,7 @@ namespace ClickTrack
              */
             MidiChannel* get_output_midi_channel();
 
-        protected:
+        private:
             /* Writes outputs into the buffer. Calls tick to determine what to
              * write out. Used by the output channel
              */
@@ -116,6 +117,7 @@ namespace ClickTrack
     class MidiConsumer
     {
         friend class TimingManager;
+        friend class MidiFilter;
 
         public:
             MidiConsumer();
@@ -126,7 +128,7 @@ namespace ClickTrack
             void set_input_midi_channel(MidiChannel* channel);
             void remove_channel();
 
-        protected:
+        private:
             /* When called, reads in the next frame from the input channels
              * and calls the tick function.
              */
@@ -155,7 +157,7 @@ namespace ClickTrack
             MidiFilter();
             virtual ~MidiFilter() {}
 
-        protected:
+        private:
             /* When called, reads in the next frame from the input channels,
              * processes it and write to the output channels.
              */

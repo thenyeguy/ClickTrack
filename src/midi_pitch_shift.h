@@ -12,11 +12,10 @@ namespace ClickTrack
 
             void set_pitch_shift(int shift);
 
-        protected:
+        private:
             void filter_events(std::vector<MidiMessage>& inputs, 
                     std::vector<MidiMessage>& outputs, unsigned long t);
 
-        private:
             int shift;
     };
 }
