@@ -1,6 +1,7 @@
 #ifndef COMPRESSOR_H
 #define COMPRESSOR_H
 
+#include "audio_generics.h"
 #include "level_detector.h"
 #include "ringbuffer.h"
 

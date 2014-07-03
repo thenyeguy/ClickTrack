@@ -1,4 +1,4 @@
-#include <math.h>
+#include <cmath>
 #include "polyphonic_instrument.h"
 
 using namespace ClickTrack;

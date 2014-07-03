@@ -1,6 +1,7 @@
 #ifndef NOISE_GATE_H
 #define NOISE_GATE_H
 
+#include "audio_generics.h"
 #include "level_detector.h"
 #include "ringbuffer.h"
 

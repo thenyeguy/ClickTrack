@@ -1,4 +1,3 @@
-#include <cstdlib>
 #include <string>
 #include "wav_reader.h"
 #include "drum_machine.h"

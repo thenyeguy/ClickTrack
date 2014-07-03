@@ -1,6 +1,5 @@
 #include <iterator>
 #include <cmath>
-#include <iostream>
 #include "fm_synth.h"
 
 using namespace ClickTrack;

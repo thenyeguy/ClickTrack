@@ -1,5 +1,4 @@
 #include <cmath>
-#include <iostream>
 #include <random>
 #include "oscillator.h"
 #include "portaudio_wrapper.h"

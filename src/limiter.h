@@ -1,6 +1,7 @@
 #ifndef LIMITER_H
 #define LIMITER_H
 
+#include "audio_generics.h"
 #include "level_detector.h"
 #include "ringbuffer.h"
 

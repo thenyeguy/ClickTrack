@@ -1,4 +1,3 @@
-#include <iterator>
 #include <cmath>
 #include "subtractive_synth.h"
 

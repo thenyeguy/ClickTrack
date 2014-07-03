@@ -1,5 +1,3 @@
-#include <iostream>
-#include <ctime>
 #include "fft.h"
 
 using namespace ClickTrack;
