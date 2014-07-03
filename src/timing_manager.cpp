@@ -4,11 +4,13 @@ using namespace ClickTrack;
 
 
 TimingManager::TimingManager()
-    : time(0),
+    : time_signature(),
+      time(0),
       midi_consumers(), 
       audio_consumers(),
       last_sync()
 {
+    // Set unsynced
     last_sync.synced = false;
 }
 
@@ -27,10 +29,14 @@ void TimingManager::add_audio_consumer(AudioConsumer* consumer)
 
 void TimingManager::tick()
 {
+    // Tick the consumers
     for(auto consumer : midi_consumers)
         consumer->tick(time);
     for(auto consumer : audio_consumers)
         consumer->tick(time);
+
+    // Tick time forward
+    time_signature.tick();
     time++;
 }
 
