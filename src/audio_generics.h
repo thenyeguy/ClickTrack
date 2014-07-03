@@ -26,7 +26,7 @@ namespace ClickTrack
              */
             SAMPLE get_sample(unsigned long t);
 
-        protected:
+        private:
             /* A channel can only exist within an audio generator, so protect
              * the constructor
              */
@@ -53,6 +53,7 @@ namespace ClickTrack
     class AudioGenerator
     {
         friend class AudioChannel;
+        friend class AudioFilter;
 
         public:
             AudioGenerator(unsigned num_output_channels = 1);
@@ -63,7 +64,7 @@ namespace ClickTrack
             unsigned get_num_output_channels();
             AudioChannel* get_output_channel(unsigned i = 0);
 
-        protected:
+        private:
             /* Writes outputs into the buffer. Calls tick to determine what to
              * write out. Used by the output channel
              */
@@ -92,6 +93,7 @@ namespace ClickTrack
      */
     class AudioConsumer
     {
+        friend class AudioFilter;
         friend class TimingManager;
 
         public:
@@ -108,7 +110,7 @@ namespace ClickTrack
 
             unsigned get_channel_index(AudioChannel* channel);
 
-        protected:
+        private:
             /* When called, reads in the next frame from the input channels
              * and calls the tick function.
              */
@@ -140,8 +142,7 @@ namespace ClickTrack
                     unsigned num_output_channels = 1);
             virtual ~AudioFilter() {}
 
-        protected:
-
+        private:
             /* When called, reads in the next frame from the input channels,
              * processes it and write to the output channels.
              */
@@ -153,8 +154,7 @@ namespace ClickTrack
             virtual void filter(std::vector<SAMPLE>& input, 
                     std::vector<SAMPLE>& output, unsigned long t) = 0;
 
-        private:
-            /* To properly implement the tick override, these functions must be
+            /* To properly implement the sublasses, these functions must be
              * defined. They do nothing.
              */
             void generate_outputs(std::vector<SAMPLE>& inputs, unsigned long t) {}
