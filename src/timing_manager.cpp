@@ -4,7 +4,7 @@ using namespace ClickTrack;
 
 
 TimingManager::TimingManager()
-    : time_signature(),
+    : rhythm_manager(),
       time(0),
       midi_consumers(), 
       audio_consumers(),
@@ -36,7 +36,7 @@ void TimingManager::tick()
         consumer->tick(time);
 
     // Tick time forward
-    time_signature.tick();
+    rhythm_manager.tick();
     time++;
 }
 

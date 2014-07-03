@@ -1,16 +1,16 @@
 #include "audio_generics.h"
-#include "time_signature.h"
+#include "rhythm_manager.h"
 
 using namespace ClickTrack;
 
 
-unsigned TimeSignature::get_tempo()
+unsigned RhythmManager::get_tempo()
 {
     return tempo;
 }
 
 
-void TimeSignature::set_tempo(unsigned in_tempo)
+void RhythmManager::set_tempo(unsigned in_tempo)
 {
     // Update the tempo
     tempo = in_tempo;
@@ -21,37 +21,37 @@ void TimeSignature::set_tempo(unsigned in_tempo)
 }
 
 
-void TimeSignature::set_meter(meter_t& in_meter)
+void RhythmManager::set_meter(meter_t& in_meter)
 {
     meter = in_meter;
 }
 
 
-const TimeSignature::meter_t& TimeSignature::get_current_meter()
+const RhythmManager::meter_t& RhythmManager::get_current_meter()
 {
     return meter;
 }
 
 
-bool TimeSignature::is_on_beat()
+bool RhythmManager::is_on_beat()
 {
     return current_tick == 0;
 }
 
 
-unsigned TimeSignature::get_current_beat()
+unsigned RhythmManager::get_current_beat()
 {
     return current_beat;
 }
 
 
-TimeSignature::BeatType TimeSignature::get_current_beat_type()
+RhythmManager::BeatType RhythmManager::get_current_beat_type()
 {
     return meter[current_beat];
 }
 
 
-TimeSignature::TimeSignature()
+RhythmManager::RhythmManager()
     : tempo(120),
       samples_per_beat(SAMPLE_RATE*60 / tempo),
       current_tick(0),
@@ -59,14 +59,14 @@ TimeSignature::TimeSignature()
       current_beat(0)
 {
     // Fill the default beat pattern
-    meter.push_back(TimeSignature::DOWNBEAT);
-    meter.push_back(TimeSignature::UNACCENTED);
-    meter.push_back(TimeSignature::UNACCENTED);
-    meter.push_back(TimeSignature::UNACCENTED);
+    meter.push_back(RhythmManager::DOWNBEAT);
+    meter.push_back(RhythmManager::UNACCENTED);
+    meter.push_back(RhythmManager::UNACCENTED);
+    meter.push_back(RhythmManager::UNACCENTED);
 }
 
 
-void TimeSignature::tick()
+void RhythmManager::tick()
 {
     // March time forward
     current_tick = (current_tick+1) % samples_per_beat;

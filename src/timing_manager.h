@@ -5,7 +5,7 @@
 #include <vector>
 #include "audio_generics.h"
 #include "generic_instrument.h"
-#include "time_signature.h"
+#include "rhythm_manager.h"
 
 namespace ClickTrack
 {
@@ -43,7 +43,7 @@ namespace ClickTrack
              * the current meter and beat status. It is public so that its API
              * is exposed directly.
              */
-            TimeSignature time_signature;
+            RhythmManager rhythm_manager;
 
 
             /* An audio consumer may synchronize the timing manager. This

@@ -1,14 +1,14 @@
-#ifndef TIME_SIGNATURE_H
-#define TIME_SIGNATURE_H
+#ifndef RHYTHM_MANAGER_H
+#define RHYTHM_MANAGER_H
 
 #include <vector>
 
 namespace ClickTrack
 {
-    /* Time signature is a class used by the timing manager to encapsulate state
+    /* Rhythm manager is a class used by the timing manager to encapsulate state
      * related to beats in a measure of music.
      */
-    class TimeSignature
+    class RhythmManager
     {
         friend class TimingManager;
 
@@ -50,7 +50,7 @@ namespace ClickTrack
             /* Protect the constructor and tick function to limit access to
              * TimingManager
              */
-            TimeSignature();
+            RhythmManager();
             void tick();
 
         private:
