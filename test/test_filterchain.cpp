@@ -3,6 +3,7 @@
 #include "../src/adder.h"
 #include "../src/delay.h"
 #include "../src/gain_filter.h"
+#include "../src/metronome.h"
 #include "../src/microphone.h"
 #include "../src/oscillator.h"
 #include "../src/speaker.h"
@@ -24,17 +25,20 @@ int main()
     GainFilter mic_gain(0.5);
     mic_gain.set_input_channel(delay.get_output_channel());
 
-    Oscillator tri(Oscillator::BlepTri, 440);
-    GainFilter tri_gain(0.5);
-    tri_gain.set_input_channel(tri.get_output_channel());
+    // Oscillator tri(Oscillator::BlepTri, 440);
+    // GainFilter tri_gain(0.5);
+    // tri_gain.set_input_channel(tri.get_output_channel());
+    Metronome metronome(timer, "samples/clicks/high_click.wav",
+            "samples/clicks/mid_click.wav",
+            "samples/clicks/low_click.wav");
 
-    Adder add(2);
-    add.set_input_channel(mic_gain.get_output_channel(), 0);
-    add.set_input_channel(tri_gain.get_output_channel(), 1);
+    // Adder add(2);
+    // add.set_input_channel(mic_gain.get_output_channel(), 0);
+    // add.set_input_channel(metronome.get_output_channel(), 1);
 
     Speaker speaker(timer, 2);
     speaker.set_input_channel(mic_gain.get_output_channel(), 0);
-    speaker.set_input_channel(tri_gain.get_output_channel(), 1);
+    speaker.set_input_channel(metronome.get_output_channel(), 1);
     timer.add_audio_consumer(&speaker);
 
 
