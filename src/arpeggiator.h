@@ -15,6 +15,12 @@ namespace ClickTrack
         public:
             Arpeggiator(TimingManager& timing_manager);
 
+            /* By default, the arpeggiator attacks every beat. This function
+             * sets how many note changes we make per beat
+             */
+            void set_beat_subdivisions(unsigned numerator, 
+                    unsigned denominator=1);
+
         private:
             void filter_events(std::vector<MidiMessage>& inputs,
                     std::vector<MidiMessage>& outputs, unsigned long t);
@@ -22,6 +28,7 @@ namespace ClickTrack
             /* The rhythm manager is used to tick notes forward on beat
              */
             RhythmManager& rhythm_manager;
+            unsigned numerator, denominator;
 
             /* Used to track the currently held keys, and our position in the
              * arpeggio. held_keys is always a sorted list of midi note numbers

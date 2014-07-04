@@ -5,10 +5,20 @@ using namespace ClickTrack;
 
 Arpeggiator::Arpeggiator(TimingManager& timing_manager)
     : rhythm_manager(timing_manager.rhythm_manager),
+      numerator(1),
+      denominator(1),
       current_note(0),
       held_keys(),
       next_note(held_keys.end())
 {}
+
+
+void Arpeggiator::set_beat_subdivisions(unsigned in_numerator, 
+        unsigned in_denominator)
+{
+    numerator = in_numerator;
+    denominator = in_denominator;
+}
 
 
 void Arpeggiator::filter_events(std::vector<MidiMessage>& inputs,
@@ -38,7 +48,7 @@ void Arpeggiator::filter_events(std::vector<MidiMessage>& inputs,
     }
 
     // Next, check for on beat and trigger notes
-    if(rhythm_manager.is_on_beat())
+    if(rhythm_manager.is_beat_subdivision(numerator, denominator))
     {
         // First construct note off
         if(current_note != 0)

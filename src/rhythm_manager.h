@@ -41,30 +41,40 @@ namespace ClickTrack
              *     are currently playing
              * get_current_beat_type() returns the type of beat we are
              *     currently playing
+             *
+             * is_xxx_subdivision() takes in a multiple, and returns whether or
+             *     not we fall directly on a subdivision samples.
+             *     i.e. is_beat_subdivision(2) tells us whether we fall on an
+             *     eighth note in 4/4, and is_beat_subdivision(3,2) tells us
+             *     whether we fall on an eight note triplet
              */
             bool is_on_beat();
             unsigned get_current_beat();
             BeatType get_current_beat_type();
 
-        protected:
+            bool is_beat_subdivision(unsigned numerator, 
+                    unsigned denominator=1);
+            bool is_measure_subdivision(unsigned numerator, 
+                    unsigned denominator=1);
+
+        private:
             /* Protect the constructor and tick function to limit access to
              * TimingManager
              */
             RhythmManager();
             void tick();
 
-        private:
             /* Store state to update time counter and compute beats
-             * current_tick indicates how many samples into a beat we are
              */
             unsigned tempo;
             unsigned samples_per_beat;
-            unsigned current_tick;
 
             /* Store state to track the current beat and the meter type.
+             * current_tick indicates how many samples into a measure we are
              */
             std::vector<BeatType> meter;
             unsigned current_beat;
+            unsigned current_tick;
     };
 }
 
